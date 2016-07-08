@@ -1,0 +1,374 @@
+Using Mutil
+===========
+
+The mcp and msum utilities of Mutil are drop-in replacements for the
+standard cp and md5sum programs from GNU coreutils.  Hence, they can be
+used in exactly the same manner with the same options.  The Mutil
+versions, however, contain performance and functionality enhancements
+accessed through additional command-line options.
+
+
+1. Mcp-specific options
+
+    Note that the defaults shown in brackets will vary depending on
+    the compile-time options utilized.
+
+    --buffer-size=MBYTES     read/write buffer size [4]
+    --check-tree             print hash subtrees to pinpoint corruption
+    --direct-read            enable use of direct I/O for reads
+    --direct-write           enable use of direct I/O for writes
+    --double-buffer          enable use of double buffering during file I/O
+    --dst-offset=POS         copy to destination file beginning at POS
+    --fadvise-read           enable use of posix_fadvise during reads
+    --fadvise-write          enable use of posix_fadvise during writes
+    --hash-leaf-size=KBYTES  granularity of hash tree [1048576]
+    --hash-type=TYPE         hash type [MD5], with TYPE one of:
+                               md5 sha1 sha256 sha384 sha512 sha224 crc32
+                               crc32rfc1510 crc24rfc2440
+    --length=LEN             copy LEN bytes beginning at --offset
+                               (or from 0 if --offset not specified)
+    --listen-port=PORT       listen on port PORT for requests from
+                               cooperating hosts
+    --manager-host=HOST      host name or IP address of management thread
+                               for multi-node/multi-host copies
+    --manager-port=PORT      port on which to contact management thread
+    --mpi                    enable use of MPI for multi-node copies
+    --offset=POS             copy --length bytes beginning at POS
+                               (or to end if --length not specified)
+    --password-file=FILE     file to use for passwords (will be created
+                               if does not exist)
+    --print-hash             print hash of each file to stdout similar to
+                               md5sum, with sum of the src file computed,
+                               but dst file name printed so that md5sum -c
+                               can be used on the output to check that the
+                               data written to disk was what was read
+    --print-src              print src instead of dst in --print-{hash,stats}
+    --print-stats            print performance per file to stderr
+    --print-stripe           print striping changes to stderr
+    --read-stdin             perform a batch of operations read over stdin
+                               in the form 'SRC DST RANGES' where SRC and DST
+                               must be URI-escaped (RFC 3986) file names and
+                               RANGES is zero or more comma-separated ranges of
+                               the form 'START-END' for 0 <= START < END
+    --skip-chmod             retain temporary permissions used during copy
+    --split-size=MBYTES      size to split files for parallelization [1024]
+    --stripe-count=COUNT     absolute number of stripes, stripes per src GBs
+                               when followed by 's', or stripes per --length
+                               GBs when followed by 'l' [1s]
+    --threads=NUMBER         number of OpenMP worker threads to use [4]
+
+
+2. Msum-specific options
+
+    Note that the defaults shown in brackets will vary depending on
+    the compile-time options utilized.
+
+    --buffer-size=MBYTES     read/write buffer size [4]
+    --check-tree             print/check hash subtrees to pinpoint corruption
+    --direct-read            enable use of direct I/O for reads
+    --double-buffer          enable use of double buffering during file I/O
+    --fadvise-read           enable use of posix_fadvise during reads
+    --hash-leaf-size=KBYTES  granularity of hash tree [1048576]
+    --hash-type=TYPE         hash type [MD5], with TYPE one of:
+                               md5 sha1 sha256 sha384 sha512 sha224 crc32
+                               crc32rfc1510 crc24rfc2440
+    --length=LEN             hash LEN bytes beginning at --offset
+                               (or 0 if --offset not specified)
+    --listen-port=PORT       listen on port PORT for requests from
+                               cooperating hosts
+    --manager-host=HOST      host name or IP address of management thread
+                               for multi-node/multi-host copies
+    --manager-port=PORT      port on which to contact management thread
+    --mpi                    enable use of MPI for multi-node checksums
+    --offset=POS             hash --length bytes beginning at POS
+                               (or to end if --length not specified)
+    --password-file=FILE     file to use for passwords (will be created
+                               if does not exist)
+    --read-stdin             perform a batch of operations read over stdin
+                               in the form 'FILE RANGES' where FILE must be
+                               a URI-escaped (RFC 3986) file name and RANGES
+                               is zero or more comma-separated ranges of the
+                               form 'START-END' for 0 <= START < END
+    --split-size=MBYTES      size to split files for parallelization [0]
+    --threads=NUMBER         number of OpenMP worker threads to use [4]
+
+
+3. Option notes
+
+    3.1. Buffer management
+
+        3.1.1. Buffer size
+
+            The --buffer-size option defines the buffer size that is
+            used in reads and writes.  In general, the larger the buffer
+            size, the greater the performance.  Note, however, that a
+            large buffer size may not be practical on multi-user systems
+            due to additional resource consumption.
+
+        3.1.2. Double buffering
+
+            The --double-buffer option enables the use of double
+            buffering for reading/writing (mcp w/o hashing),
+            reading/hashing (msum), and writing/hashing (mcp w/
+            hashing).  This option allows individual operations to be
+            overlapped with each other and should always be used to
+            maximize performance.
+
+        3.1.3. Direct I/O
+
+            The --direct-read and --direct-write options enable the
+            use of direct I/O between memory and disk, bypassing kernel
+            buffers.  Always enable these options if possible for
+            fastest performance from a single node.  If a file system
+            does not support direct I/O, --fadvise-read is recommended
+            as an alternative.
+
+            Note that --direct-read and --direct-write are mutually
+            exclusive with --fadvise-read and --fadvise-write,
+            respectively, and that --direct-write is not applicable to
+            msum.
+
+        3.1.4. posix_fadvise
+
+            The --fadvise-read and --fadvise-write options enable the
+            use of posix_fadvise() to inform the kernel about buffer
+            access patterns.  These options are useful for preventing
+            thrashing of the buffer cache for other processes running
+            on the same system.  The --fadvise-write option has a large
+            negative impact on performance due to the synchronization of
+            each block that must be performed for it to have any effect.
+    
+            Note that --fadvise-read and --fadvise-write are mutually
+            exclusive with --direct-read and --direct-write,
+            respectively.
+
+    3.2. File splitting
+
+        The --split-size option defines the point at which file
+        processing will be divided amongst multiple threads/nodes.
+        This option is required to achieve maximum performance on large
+        files.
+
+        Note that the split size must be a power of 2 and will be
+        adjusted up as needed.  The split size must also be greater than
+        the buffer size and hash leaf size.  Setting the split size to
+        less than 1 GB is not recommended as overhead increases with
+        the number of splits.
+
+    3.3. Multi-threading
+
+        The --threads option defines how many OpenMP worker threads will
+        be used for file operations.  Note that --split-size must be
+        greater than zero for this to have any benefit on large files.
+        Also note that either direct I/O or posix_fadvise should always
+        be used with multiple threads or else thrashing of the buffer
+        cache will likely eliminate any benefits of multi-threading.
+
+    3.4. Multi-node processing
+
+        Mcp and msum support two mutually-exclusive multi-node models:
+        TCP and MPI.  MPI has simpler command-line parameters for
+        environments that support it, but TCP is more portable.
+
+        3.4.1. TCP multi-node processing
+
+            3.4.1.1. Manager node
+
+                In the TCP model, one host is defined to be the manager
+                node using the --listen-port option, which defines the
+                TCP port through which worker nodes will contact the
+                manager.  Communication is secured using TLS-SRP
+                initialized with a plaintext password stored in the
+                file defined by the --password-file option.
+
+                Note that the contents of --password-file should *NOT*
+                be you login password.  The password is not used for
+                login...it is only used to secure network communication.
+                Mcp and msum will automatically generate a strong
+                password if the file does not exist (recommended).
+                The same password file can be used for multiple
+                invocations.
+
+                The manager generates two additional files it needs for
+                authentication at the same location as the password
+                file, but with ".mg" and ".pw" extensions.  These
+                files are only used by the manager.
+
+            3.4.1.2. Worker nodes
+
+                A worker node processes various file tasks parceled out
+                by the manager node.  The --manager-host option defines
+                the host name or IP address of the manager node that
+                is listening on the TCP port defined by the
+                --manager-port option.  Each worker must also be given a
+                --password-file option that defines the location of the
+                password file given to the manager.  This file may need
+                to be copied to worker nodes if they do not have access
+                to the same file system.  The ".mg" and ".pw" files do
+                not need to be copied.
+
+                Note that all other options given to workers should be
+                identical to those given to the manager.  The file
+                arguments, however, should be omitted.  Changing the
+                other options will have unknown and/or undesirable
+                results.
+
+        3.4.2. MPI multi-node processing
+
+            The --mpi option enables the use of MPI for multi-node
+            processing.  The same exact options and arguments are given
+            to all nodes.  
+                
+    3.5. Hashing
+
+        The --print-hash option to mcp will enable the computation of
+        hashes for each file that will be printed to standard out.
+        In msum, this option is unnecessary as hashes are printed by
+        default.  By default, the target file name is shown.  The
+        --print-src option can be used to alternatively show the source
+        file name.
+
+        The --hash-type option changes the type of hash computed.  The
+        hash types supported by mcp and msum are dependent on the hash
+        types compiled into the local Libgcrypt installation.  Consult
+        the corresponding man page or invoke mcp/msum with --help to
+        see the list of supported hashes.
+
+        Note that when --split-size is greater than zero, hash trees
+        are used to combine the hash results of individual file chunks.
+        Hence, the output will not conform to the output of the
+        corresponding hash type without splitting.  The benefit of
+        splitting, however, is much greater performance on large files.
+        When the file size is less than the split size, the hash tree
+        value will match the standard hash value.
+
+        The --check-tree option will print the root hashes of each split
+        subtree instead of combining the result into a single hash
+        value.  When used with msum's -c option, msum will print the
+        ranges of the file that are corrupted, if applicable, at the
+        granularity of the split size.
+
+        The --hash-leaf-size can be used to change the granularity of
+        the hash tree.  This option, however, is mainly intended to be
+        used with another option that is currently disabled.
+      
+        The output of mcp using --print-hash will conform to the
+        output of msum as long as the same --check-tree, --hash-type,
+        --hash-leaf-size, and --split-size options are used.
+
+    3.6. Statistics
+
+        The --print-stats option will print various performance stats to
+        standard error for each individual file or file split together
+        with total stats.  By default, the target file name is shown.
+        The --print-src option can be used to alternatively show the
+        source file name.
+
+    3.7. Partial transfers
+
+        The --offset and --length options can be used to copy/sum a
+        portion of a file.  The offset specifies the starting position
+        in the source file and the length specifies the number of bytes
+        to copy/sum.  By default, the same offset will be used in both
+        the source and destination files.  The --dst-offset option can
+        be used to specify a different offset in the destination file.
+
+    3.8. Batch transfers
+
+        The --read-stdin option allows an arbitrary batch of file copies
+        or checksums to be performed.  For mcp, each line read on stdin
+        must be of the form "SRC DST RANGES", where SRC and DST are file
+        names and RANGES is zero or more comma-separated ranges.  For
+        msum, each line must be of the form "FILE RANGES".  All files
+        must be URI-escaped (not URIs but escaped in a similar manner)
+        according to RFC 3986.  The following perl function demonstrates
+        how file names can be escaped:
+
+            sub escape {
+                my $text = shift;
+                $text =~ s/([^A-Za-z0-9\-_.!~*'()\/])/sprintf("%%%02X", ord($1))/eg
+                    if (defined $text);
+                return $text;
+            }
+
+        Each range in the set of optional ranges is defined "START-END",
+        where 0 <= START < END.  For example, "1-3,10-12" would operate
+        on bytes 1,2,10,11.
+
+    3.9. Temporary permissions
+
+        During a copy of read-only files, mcp temporarily uses
+        permissions on the target file that are the same as the source
+        file, but with owner write permission.  For some purposes, it
+        desirable to retain these temporary permissions instead of
+        restoring the original permissions.  For example, this can be
+        used when detecting corruption that may have occurred due to
+        transient errors and the corrupted portion must be written
+        again.  To skip the final chmod that will bring the target file
+        back to the source permissions, the --skip-chmod option
+        can be used.
+
+    3.10. Lustre striping
+
+        By default, the striping of files transferred from one Lustre
+        file system to another that have a stripe count other than the
+        system default will be preserved.  Files that have the default
+        stripe count or come from a non-Lustre file system will be
+        restriped to one stripe per GB.  The --stripe-count option
+        allows files to be striped either to an absolute number of
+        stripes (e.g. 4), a number of stripes per source GBs when the
+        given value is followed by 's' (e.g. 0.25s), or a number of
+        stripes per --length GBs when the given value is followed by 'l'
+        (e.g. 4.5l).
+
+
+4. Performance
+
+    See https://pkolano.github.io/papers/lisa10.pdf for (old) expected
+    performance numbers.  Note that the results reported in this paper
+    were measured using dedicated compute nodes and near-idle file
+    systems.  The actual performance observed in practice will depend
+    upon the characteristics of your environment.
+
+
+5. Examples
+
+    Note that all examples should use either direct I/O or
+    posix_fadvise, but these were omitted for readability.
+
+    5.1. Recursively copy /src to /dst
+
+        mcp -r /src /dst
+
+    5.2. Recursively copy /src to /dst while printing stats and
+         storing hashes in /tmp/sums
+
+        mcp --print-stats --print-hash -r /src /dst >/tmp/sums
+
+    5.3. Check the sums stored in the file /tmp/sums
+
+        msum --print-stats -c /tmp/sums
+
+    5.3. Recursively copy /src to /dst while listening for other worker
+         nodes on port 1234 with password file /my/pw
+
+        mcp --listen-port=1234 --password-file=/my/pw -r /src /dst
+
+    5.4. Join into a copy started on manager "mhost" using port 1234 and
+         password file /my/pw
+
+        mcp --manager-host=mhost --manager-port=1234 --password-file=/my/pw
+        
+    5.5. Recursively copy /src to /dst using 8 MPI nodes
+
+        mpiexec -np 8 mcp --mpi -r /src /dst
+
+    5.6. Recursively copy /src to /dst using TCP in a PBS job using port
+         1234 and password file /my/pw
+
+        export mhost=`hostname`
+        mcp -r --listen-port=1234 --password-file=/my/pw /src /dst &
+        for n in `grep -v $mgr $PBS_NODEFILE |sort -u`; do
+            ssh $n "setsid mcp --password-file=/my/pw --manager-host=$mhost \
+                --manager-port=1234 &" &
+

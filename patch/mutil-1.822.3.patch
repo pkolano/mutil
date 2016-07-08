@@ -1,0 +1,157 @@
+diff -rupN old3/src/copy.c new/src/copy.c
+--- old3/src/copy.c	2015-03-03 09:17:41.881896709 -0800
++++ new/src/copy.c	2016-04-14 15:25:49.136481633 -0700
+@@ -728,7 +728,8 @@ extent_copy (copy_reg_t *crt, struct cp_
+                   || (!empty_extent && sparse_mode != SPARSE_NEVER))
+                 {
+ // PZK >
+-                  if (lseek (crt->dst_fd, ext_start, SEEK_SET) < 0)
++                  if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                            ext_start, SEEK_SET) < 0)
+                     {
+                       error (0, errno, _("cannot lseek %s"), quote (crt->dst_name));
+ // < PZK
+@@ -745,7 +746,13 @@ extent_copy (copy_reg_t *crt, struct cp_
+                   if (empty_extent)
+ // PZK >
+                     nzeros = MIN (crt->stop_offset - dest_pos, hole_size);
+-
++                    // when double buffering, dst_fd may not even be set
++                    if (co->double_buffer && lseek(crt->dst_fd,
++                            crt->dst_offset - crt->start_offset +
++                            crt->stop_offset - nzeros, SEEK_SET) < 0L) {
++                        error (0, errno, _("cannot lseek %s"), quote (crt->dst_name));
++                        goto fail;
++                    }
+                   if (! write_zeros (crt->dst_fd, nzeros))
+                     {
+                       error (0, errno, _("%s: write failed"), quote (crt->dst_name));
+@@ -836,25 +843,30 @@ extent_copy (copy_reg_t *crt, struct cp_
+      here in order to record the proper length in the destination.  */
+ 
+ // PZK >
+-  if (wrote_hole_at_eof && crt->dst_offset == 0 &&
+-      crt->stop_offset == src_total_size &&
+-      (sparse_mode != SPARSE_NEVER
+-          ? ftruncate (crt->dst_fd, src_total_size)
+-          : ! write_zeros (crt->dst_fd, src_total_size - dest_pos)))
+-    {
+-      error (0, errno, _("failed to extend %s"), quote (crt->dst_name));
+-      return false;
+-    }
+-  else if (wrote_hole_at_eof && crt->split + 1 == crt->nsplits &&
+-      (lseek (crt->dst_fd, (off_t) -1, SEEK_CUR) < 0L
+-       || co->write_mode
+-       && fcntl (crt->dst_fd, F_SETFL,
+-          fcntl (crt->dst_fd, F_GETFL) & ~O_DIRECT)
+-       || full_write (crt->dst_fd, "", 1) != 1))
+-    {
+-      error (0, errno, _("writing %s"), quote (crt->dst_name));
+-      return false;
++  if (wrote_hole_at_eof || dest_pos < crt->stop_offset) {
++    if (sparse_mode == SPARSE_NEVER) {
++        if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                dest_pos, SEEK_SET) < 0L ||
++                !write_zeros(crt->dst_fd, crt->stop_offset - dest_pos)) {
++            error (0, errno, _("%s: write failed"), quote (crt->dst_name));
++            return false;
++        }
++    } else if (crt->dst_offset == 0 && crt->stop_offset == src_total_size) {
++        if (ftruncate(crt->dst_fd, src_total_size)) {
++            error (0, errno, _("failed to extend %s"), quote (crt->dst_name));
++            return false;
++        }
++    } else if (crt->split + 1 == crt->nsplits) {
++        if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                crt->stop_offset - 1, SEEK_SET) < 0L ||
++                co->write_mode && fcntl (crt->dst_fd, F_SETFL,
++                    fcntl (crt->dst_fd, F_GETFL) & ~O_DIRECT) ||
++                full_write (crt->dst_fd, "", 1) != 1) {
++            error (0, errno, _("%s: write failed"), quote (crt->dst_name));
++            return false;
++        }
+     }
++  }
+ 
+ #if HAVE_LIBGCRYPT
+   if (dest_pos < crt->stop_offset) {
+@@ -1441,27 +1453,36 @@ copy_reg_task (copy_reg_t *crt, struct c
+                          , &ctx, &htt
+ #endif
+                        );
+-    if (copy_ok && wrote_hole_at_eof && crt->dst_offset == 0 &&
+-        crt->stop_offset == src_open_sb.st_size &&
+-        ftruncate (crt->dst_fd, src_open_sb.st_size) < 0)
+-      {
+-        error (0, errno, _("failed to extend %s"), quote (crt->dst_name));
+-        return_val = false;
+-        goto task_close_src_and_dst_desc;
+-      }
+-    else if (copy_ok && wrote_hole_at_eof && crt->split + 1 == crt->nsplits &&
+-        (lseek (crt->dst_fd, (off_t) -1, SEEK_CUR) < 0L
+ // PZK >
+-         || co->write_mode
+-         && fcntl (crt->dst_fd, F_SETFL,
+-            fcntl (crt->dst_fd, F_GETFL) & ~O_DIRECT)
++    off_t dest_pos = crt->start_offset + n_read;
++    if (copy_ok && (wrote_hole_at_eof || dest_pos < crt->stop_offset)) {
++        if (co->sparse_mode == SPARSE_NEVER) {
++            if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                    dest_pos, SEEK_SET) < 0L ||
++                    !write_zeros(crt->dst_fd, crt->stop_offset - dest_pos)) {
++                error (0, errno, _("%s: write failed"), quote (crt->dst_name));
++                return_val = false;
++                goto task_close_src_and_dst_desc;
++            }
++        } else if (crt->dst_offset == 0 && crt->stop_offset == src_open_sb.st_size) {
++            if (ftruncate(crt->dst_fd, src_open_sb.st_size)) {
++                error (0, errno, _("failed to extend %s"), quote (crt->dst_name));
++                return_val = false;
++                goto task_close_src_and_dst_desc;
++            }
++        } else if (crt->split + 1 == crt->nsplits) {
++            if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                    crt->stop_offset - 1, SEEK_SET) < 0L ||
++                    co->write_mode && fcntl (crt->dst_fd, F_SETFL,
++                        fcntl (crt->dst_fd, F_GETFL) & ~O_DIRECT) ||
++                    full_write (crt->dst_fd, "", 1) != 1) {
++                error (0, errno, _("%s: write failed"), quote (crt->dst_name));
++                return_val = false;
++                goto task_close_src_and_dst_desc;
++            }
++        }
++    }
+ // < PZK
+-         || full_write (crt->dst_fd, "", 1) != 1))
+-      {
+-        error (0, errno, _("writing %s"), quote (crt->dst_name));
+-        return_val = false;
+-        goto task_close_src_and_dst_desc;
+-      }
+ 
+ task_preserve_metadata:
+   if (co->preserve_timestamps)
+diff -rupN old3/src/cp.c new/src/cp.c
+--- old3/src/cp.c	2015-03-03 09:17:45.725999592 -0800
++++ new/src/cp.c	2016-04-14 15:25:51.892490795 -0700
+@@ -143,7 +143,7 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
+ 
+ /* The official name of this program (e.g., no 'g' prefix).  */
+ // PZK >
+-#define PROGRAM_NAME "mcp 1.822.3"
++#define PROGRAM_NAME "mcp 1.822.4"
+ 
+ #define AUTHORS \
+   proper_name_utf8 ("Torbjorn Granlund", "Torbj\303\266rn Granlund"), \
+diff -rupN old3/src/md5sum.c new/src/md5sum.c
+--- old3/src/md5sum.c	2015-03-03 09:17:49.190092302 -0800
++++ new/src/md5sum.c	2016-04-14 15:53:31.945968066 -0700
+@@ -139,7 +139,7 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
+ /* The official name of this program (e.g., no 'g' prefix).  */
+ #if HASH_ALGO_MD5
+ // PZK >
+-# define PROGRAM_NAME "msum 1.822.3"
++# define PROGRAM_NAME "msum 1.822.4"
+ // < PZK
+ # define DIGEST_TYPE_STRING "MD5"
+ # define DIGEST_STREAM md5_stream

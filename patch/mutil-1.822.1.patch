@@ -1,0 +1,1033 @@
+diff -rupN old1/configure new/configure
+--- old1/configure	2015-01-08 11:43:53.618249316 -0800
++++ new/configure	2015-01-14 15:14:48.672899793 -0800
+@@ -8393,7 +8393,7 @@ fi
+ $as_echo "$ac_cv_lib_gcrypt_gcry_md_open" >&6; }
+ if test "x$ac_cv_lib_gcrypt_gcry_md_open" = xyes; then :
+ 
+-            LIBS="$LIBS -Wl,--as-needed -lgcrypt -Wl,--no-as-needed"
++            LIBS="$LIBS -lgcrypt"
+ 
+ $as_echo "#define HAVE_LIBGCRYPT 1" >>confdefs.h
+ 
+@@ -8438,7 +8438,7 @@ fi
+ $as_echo "$ac_cv_lib_gpg_error_gpg_err_init" >&6; }
+ if test "x$ac_cv_lib_gpg_error_gpg_err_init" = xyes; then :
+ 
+-            LIBS="$LIBS -Wl,--as-needed -lgpg-error -Wl,--no-as-needed"
++            LIBS="$LIBS -lgpg-error"
+ 
+ $as_echo "#define HAVE_LIBGPG_ERROR 1" >>confdefs.h
+ 
+@@ -8591,7 +8591,7 @@ fi
+ $as_echo "$ac_cv_lib_gnutls_gnutls_srp_verifier" >&6; }
+ if test "x$ac_cv_lib_gnutls_gnutls_srp_verifier" = xyes; then :
+ 
+-            LIBS="$LIBS -Wl,--as-needed -lgnutls -Wl,--no-as-needed"
++            LIBS="$LIBS -lgnutls"
+ 
+ $as_echo "#define HAVE_LIBGNUTLS 1" >>confdefs.h
+ 
+@@ -8636,7 +8636,7 @@ fi
+ $as_echo "$ac_cv_lib_z_zlibVersion" >&6; }
+ if test "x$ac_cv_lib_z_zlibVersion" = xyes; then :
+ 
+-            LIBS="$LIBS -Wl,--as-needed -lz -Wl,--no-as-needed"
++            LIBS="$LIBS -lz"
+ 
+ $as_echo "#define HAVE_LIBZ 1" >>confdefs.h
+ 
+@@ -8646,102 +8646,6 @@ fi
+     fi
+ 
+ 
+-
+-    if test $MUTIL_STATIC_GCRYPT = yes; then
+-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gnutls_extra_check_version in -lgnutls-extra" >&5
+-$as_echo_n "checking for gnutls_extra_check_version in -lgnutls-extra... " >&6; }
+-if ${ac_cv_lib_gnutls_extra_gnutls_extra_check_version+:} false; then :
+-  $as_echo_n "(cached) " >&6
+-else
+-  ac_check_lib_save_LIBS=$LIBS
+-LIBS="-lgnutls-extra  $LIBS"
+-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+-/* end confdefs.h.  */
+-
+-/* Override any GCC internal prototype to avoid an error.
+-   Use char because int might match the return type of a GCC
+-   builtin and then its argument prototype would still apply.  */
+-#ifdef __cplusplus
+-extern "C"
+-#endif
+-char gnutls_extra_check_version ();
+-int
+-main ()
+-{
+-return gnutls_extra_check_version ();
+-  ;
+-  return 0;
+-}
+-_ACEOF
+-if ac_fn_c_try_link "$LINENO"; then :
+-  ac_cv_lib_gnutls_extra_gnutls_extra_check_version=yes
+-else
+-  ac_cv_lib_gnutls_extra_gnutls_extra_check_version=no
+-fi
+-rm -f core conftest.err conftest.$ac_objext \
+-    conftest$ac_exeext conftest.$ac_ext
+-LIBS=$ac_check_lib_save_LIBS
+-fi
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gnutls_extra_gnutls_extra_check_version" >&5
+-$as_echo "$ac_cv_lib_gnutls_extra_gnutls_extra_check_version" >&6; }
+-if test "x$ac_cv_lib_gnutls_extra_gnutls_extra_check_version" = xyes; then :
+-
+-            LIBS="$LIBS -Wl,-Bstatic -lgnutls-extra -Wl,-Bdynamic"
+-
+-$as_echo "#define HAVE_LIBGNUTLS_EXTRA 1" >>confdefs.h
+-
+-
+-fi
+-
+-    else
+-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gnutls_extra_check_version in -lgnutls-extra" >&5
+-$as_echo_n "checking for gnutls_extra_check_version in -lgnutls-extra... " >&6; }
+-if ${ac_cv_lib_gnutls_extra_gnutls_extra_check_version+:} false; then :
+-  $as_echo_n "(cached) " >&6
+-else
+-  ac_check_lib_save_LIBS=$LIBS
+-LIBS="-lgnutls-extra  $LIBS"
+-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+-/* end confdefs.h.  */
+-
+-/* Override any GCC internal prototype to avoid an error.
+-   Use char because int might match the return type of a GCC
+-   builtin and then its argument prototype would still apply.  */
+-#ifdef __cplusplus
+-extern "C"
+-#endif
+-char gnutls_extra_check_version ();
+-int
+-main ()
+-{
+-return gnutls_extra_check_version ();
+-  ;
+-  return 0;
+-}
+-_ACEOF
+-if ac_fn_c_try_link "$LINENO"; then :
+-  ac_cv_lib_gnutls_extra_gnutls_extra_check_version=yes
+-else
+-  ac_cv_lib_gnutls_extra_gnutls_extra_check_version=no
+-fi
+-rm -f core conftest.err conftest.$ac_objext \
+-    conftest$ac_exeext conftest.$ac_ext
+-LIBS=$ac_check_lib_save_LIBS
+-fi
+-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gnutls_extra_gnutls_extra_check_version" >&5
+-$as_echo "$ac_cv_lib_gnutls_extra_gnutls_extra_check_version" >&6; }
+-if test "x$ac_cv_lib_gnutls_extra_gnutls_extra_check_version" = xyes; then :
+-
+-            LIBS="$LIBS -Wl,--as-needed -lgnutls-extra -Wl,--no-as-needed"
+-
+-$as_echo "#define HAVE_LIBGNUTLS_EXTRA 1" >>confdefs.h
+-
+-
+-fi
+-
+-    fi
+-
+-
+     for ac_header in lustre/liblustreapi.h
+ do :
+   ac_fn_c_check_header_mongrel "$LINENO" "lustre/liblustreapi.h" "ac_cv_header_lustre_liblustreapi_h" "$ac_includes_default"
+@@ -25462,7 +25366,6 @@ fi
+ 
+ 
+ 
+-
+   gl_source_base='lib'
+ 
+ 
+@@ -55087,7 +54990,6 @@ done
+ 
+ 
+ 
+-
+ 
+ 
+ 
+diff -rupN old1/lib/config.hin new/lib/config.hin
+--- old1/lib/config.hin	2015-01-08 11:43:54.000000000 -0800
++++ new/lib/config.hin	2015-01-14 15:14:49.000000000 -0800
+@@ -1642,9 +1642,6 @@
+ /* Define to 1 if you have the 'gnutls' library ('lgnutls') */
+ #undef HAVE_LIBGNUTLS
+ 
+-/* Define to 1 if you have the 'gnutls-extra' library ('lgnutls-extra') */
+-#undef HAVE_LIBGNUTLS_EXTRA
+-
+ /* Define to 1 if you have the 'gpg-error' library ('lgpg-error') */
+ #undef HAVE_LIBGPG_ERROR
+ 
+diff -rupN old1/m4/gnulib-common.m4 new/m4/gnulib-common.m4
+--- old1/m4/gnulib-common.m4	2014-01-23 11:53:12.972953570 -0800
++++ new/m4/gnulib-common.m4	2015-01-14 15:01:59.892025391 -0800
+@@ -13,7 +13,6 @@ AC_DEFUN([gl_COMMON], [
+ dnl PZK >
+   AC_REQUIRE([mutil_LIBM])
+   AC_REQUIRE([mutil_LIBRT])
+-  AC_REQUIRE([mutil_LIBGNUTLS_EXTRA])
+   AC_REQUIRE([mutil_LIBGNUTLS])
+   AC_REQUIRE([mutil_LIBGCRYPT])
+   AC_REQUIRE([mutil_LIBLUSTREAPI])
+diff -rupN old1/m4/mutil.m4 new/m4/mutil.m4
+--- old1/m4/mutil.m4	2014-01-24 14:43:52.783638058 -0800
++++ new/m4/mutil.m4	2015-01-14 15:02:53.013467878 -0800
+@@ -15,25 +15,6 @@ AC_DEFUN([mutil_LIBRT], [
+     AC_CHECK_LIB([rt], [clock_gettime])
+ ])
+ 
+-AC_DEFUN([mutil_LIBGNUTLS_EXTRA], [
+-    AC_REQUIRE([mutil_LIBGNUTLS])
+-    if test $MUTIL_STATIC_GCRYPT = yes; then
+-        AC_CHECK_LIB([gnutls-extra], [gnutls_extra_check_version], [
+-            LIBS="$LIBS -Wl,-Bstatic -lgnutls-extra -Wl,-Bdynamic"
+-            AC_DEFINE([HAVE_LIBGNUTLS_EXTRA], [1], [
+-                Define to 1 if you have the 'gnutls-extra' library ('lgnutls-extra')
+-            ])
+-        ])
+-    else
+-        AC_CHECK_LIB([gnutls-extra], [gnutls_extra_check_version], [
+-            LIBS="$LIBS -Wl,--as-needed -lgnutls-extra -Wl,--no-as-needed"
+-            AC_DEFINE([HAVE_LIBGNUTLS_EXTRA], [1], [
+-                Define to 1 if you have the 'gnutls-extra' library ('lgnutls-extra')
+-            ])
+-        ])
+-    fi
+-])
+-
+ AC_DEFUN([mutil_LIBGNUTLS], [
+     AC_REQUIRE([mutil_LIBGCRYPT])
+     AC_CHECK_HEADERS([gnutls/gnutls.h])
+@@ -52,13 +33,13 @@ AC_DEFUN([mutil_LIBGNUTLS], [
+         ])
+     else
+         AC_CHECK_LIB([gnutls], [gnutls_srp_verifier], [
+-            LIBS="$LIBS -Wl,--as-needed -lgnutls -Wl,--no-as-needed"
++            LIBS="$LIBS -lgnutls"
+             AC_DEFINE([HAVE_LIBGNUTLS], [1], [
+                 Define to 1 if you have the 'gnutls' library ('lgnutls')
+             ])
+         ])
+         AC_CHECK_LIB([z], [zlibVersion], [
+-            LIBS="$LIBS -Wl,--as-needed -lz -Wl,--no-as-needed"
++            LIBS="$LIBS -lz"
+             AC_DEFINE([HAVE_LIBZ], [1], [
+                 Define to 1 if you have the 'z' library ('lz')
+             ])
+@@ -88,13 +69,13 @@ AC_DEFUN([mutil_LIBGCRYPT], [
+         ])
+     else
+         AC_CHECK_LIB([gcrypt], [gcry_md_open], [
+-            LIBS="$LIBS -Wl,--as-needed -lgcrypt -Wl,--no-as-needed"
++            LIBS="$LIBS -lgcrypt"
+             AC_DEFINE([HAVE_LIBGCRYPT], [1], [
+                 Define to 1 if you have the 'gcrypt' library ('lgcrypt')
+             ])
+         ])
+         AC_CHECK_LIB([gpg-error], [gpg_err_init], [
+-            LIBS="$LIBS -Wl,--as-needed -lgpg-error -Wl,--no-as-needed"
++            LIBS="$LIBS -lgpg-error"
+             AC_DEFINE([HAVE_LIBGPG_ERROR], [1], [
+                 Define to 1 if you have the 'gpg-error' library ('lgpg-error')
+             ])
+diff -rupN old1/src/copy.c new/src/copy.c
+--- old1/src/copy.c	2015-01-08 12:06:32.775210161 -0800
++++ new/src/copy.c	2016-04-14 15:25:49.136481633 -0700
+@@ -133,29 +133,32 @@
+ #endif
+ 
+ // PZK >
+-#ifndef SYNC_FILE_RANGE_WRITE
+-# define SYNC_FILE_RANGE_WAIT_BEFORE     1
+-# define SYNC_FILE_RANGE_WRITE           2
+-# define SYNC_FILE_RANGE_WAIT_AFTER      4
+-
+-# ifdef __i386__
+-#  define NR_sync_file_range 314
+-# endif
+-
+-# ifdef __x86_64__
+-#  define NR_sync_file_range 277
+-# endif
++#ifdef __linux__
++# include <linux/falloc.h>
+ 
+-# ifdef __ia64__
+-#  define NR_sync_file_range 1300
+-# endif
++# ifndef SYNC_FILE_RANGE_WRITE
++#  define SYNC_FILE_RANGE_WAIT_BEFORE     1
++#  define SYNC_FILE_RANGE_WRITE           2
++#  define SYNC_FILE_RANGE_WAIT_AFTER      4
++
++#  ifdef __i386__
++#   define NR_sync_file_range 314
++#  endif
++
++#  ifdef __x86_64__
++#   define NR_sync_file_range 277
++#  endif
++
++#  ifdef __ia64__
++#   define NR_sync_file_range 1300
++#  endif
+ 
+-# include <unistd.h>
++#  include <unistd.h>
+ static inline int sync_file_range(
+         int fd, loff_t offset, loff_t nbytes, int flags) {
+     return syscall(NR_sync_file_range, fd, offset, nbytes, flags);
+ }
+-
++# endif
+ #endif
+ 
+ #if HAVE_LIBLUSTREAPI
+@@ -166,10 +169,9 @@ static inline int sync_file_range(
+ # define MAX_OSTS 1024
+ # define LOV_EA_SIZE(lum, num) (sizeof(*lum) + num * sizeof(*lum->lmm_objects))
+ # define LOV_EA_MAX(lum) LOV_EA_SIZE(lum, MAX_OSTS)
+-//# ifndef LOV_MAX_STRIPE_COUNT
+ //TODO: llapi is still messed up when max above 160 (could be our env
+ //      with mix of lustre versions)
+-#  define LOV_MAX_STRIPE_COUNT 160
++#  define MUTIL_MAX_STRIPE_COUNT 160
+ //# endif
+ #endif
+ 
+@@ -180,10 +182,6 @@ static inline int sync_file_range(
+ # include <gcrypt.h>
+ #endif
+ 
+-#ifdef __linux__
+-# include <linux/falloc.h>
+-#endif
+-
+ #ifndef DEFAULT_LUSTRE_STRIPES
+ # define DEFAULT_LUSTRE_STRIPES 1
+ #endif
+@@ -310,13 +308,33 @@ sparse_copy (copy_reg_t *crt, struct cp_
+ 
+       ssize_t n_read;
+       if (raiol[0] != NULL) {
+-           // this will be skipped during the first double buffer iteration
+-          aio_suspend((const struct aiocb * const *) raiol, 1, NULL);
+-          if (co->print_stats) clock_gettime(CLOCK_REALTIME, &rts[1]);
++          // this will be skipped during the first double buffer iteration
++          // wait for previous asynchronous read to complete
++          while (aio_suspend((const struct aiocb * const *) raiol, 1, NULL) && errno == EINTR);
++          if (co->print_stats) clock_gettime(0, &rts[1]);
+           if (waiol[0] != NULL) {
+-              aio_suspend((const struct aiocb * const *) waiol, 1, NULL);
++              while (1) {
++                // wait for previous asynchronous write to complete
++                while (aio_suspend((const struct aiocb * const *) waiol, 1, NULL) && errno == EINTR);
++                ssize_t n_write = aio_return(waiol[0]);
++                if (n_write < 0 && errno == EINTR ||
++                        n_write >= 0 && n_write < waiol[0]->aio_nbytes) {
++                    // retry if write interrupted or short write
++                    if (aio_write(waiol[0]) < 0) {
++                        error (0, errno, _("failed to initiate aio_write: %s"),
++                            quote (crt->dst_name));
++                        return false;
++                    }
++                    continue;
++                } else if (n_write < 0) {
++                    // abort if write error
++                    error (0, errno, _("writing %s"), quote (crt->dst_name));
++                    return false;
++                }
++                break;
++              }
+               if (co->print_stats) {
+-                clock_gettime(CLOCK_REALTIME, &wts[1]);
++                clock_gettime(0, &wts[1]);
+                 crt->write_time += (double) (
+                     (double) wts[1].tv_sec +
+                         (double) wts[1].tv_nsec / (double) 1.0e9 -
+@@ -341,9 +359,9 @@ sparse_copy (copy_reg_t *crt, struct cp_
+                       quote(crt->src_name));
+           }
+ 
+-          if (co->print_stats) clock_gettime(CLOCK_REALTIME, &rts[0]);
++          if (co->print_stats) clock_gettime(0, &rts[0]);
+           n_read = read (crt->src_fd, buf[aio_buf], to_read);
+-          if (co->print_stats) clock_gettime(CLOCK_REALTIME, &rts[1]);
++          if (co->print_stats) clock_gettime(0, &rts[1]);
+ 
+           if (co->read_mode && align_read != 0) {
+             // turn direct i/o back on in case it was turned off
+@@ -407,15 +425,18 @@ sparse_copy (copy_reg_t *crt, struct cp_
+                     quote(crt->src_name));
+         }
+ 
+-        if (co->print_stats) clock_gettime(CLOCK_REALTIME, &rts[0]);
++        if (co->print_stats) clock_gettime(0, &rts[0]);
+         memset(&raio, 0, sizeof(struct aiocb));
+         raio.aio_fildes = crt->src_fd;
+         raio.aio_offset = start_offset + *total_n_read;
+         raio.aio_buf = buf[!aio_buf];
+         raio.aio_nbytes = to_read;
+         raiol[0] = &raio;
+-        //TODO: error handling for bad aio_read
+-        int rc = aio_read(&raio);
++        if (aio_read(&raio) < 0) {
++            error (0, errno, _("failed to initiate aio_read: %s"),
++                quote (crt->src_name));
++            return false;
++        }
+       }
+ // < PZK
+ 
+@@ -461,7 +482,7 @@ sparse_copy (copy_reg_t *crt, struct cp_
+                 error (0, errno, _("failed to turn off O_DIRECT: %s"),
+                     quote (crt->dst_name));
+           }
+-          if (co->print_stats) clock_gettime(CLOCK_REALTIME, &wts[0]);
++          if (co->print_stats) clock_gettime(0, &wts[0]);
+           ssize_t n_write;
+           if (co->double_buffer) {
+             memset(&waio, 0, sizeof(struct aiocb));
+@@ -470,11 +491,15 @@ sparse_copy (copy_reg_t *crt, struct cp_
+             waio.aio_buf = buf[aio_buf];
+             waio.aio_nbytes = n;
+             waiol[0] = &waio;
+-            n_write = aio_write(&waio);
++            if (aio_write(&waio) < 0) {
++                error (0, errno, _("failed to initiate aio_write: %s"),
++                    quote (crt->dst_name));
++                return false;
++            }
+           } else {
+             n_write = full_write (crt->dst_fd, buf[aio_buf], n);
+             if (co->print_stats) {
+-                clock_gettime(CLOCK_REALTIME, &wts[1]);
++                clock_gettime(0, &wts[1]);
+                 crt->write_time += (double) (
+                     (double) wts[1].tv_sec +
+                         (double) wts[1].tv_nsec / (double) 1.0e9 -
+@@ -483,7 +508,6 @@ sparse_copy (copy_reg_t *crt, struct cp_
+             }
+           }
+ 
+-          //TODO: check wrote n bytes in double buffer case?
+           if (!co->double_buffer && n_write != n)
+             {
+               error (0, errno, _("writing %s"), quote (crt->dst_name));
+@@ -509,16 +533,38 @@ sparse_copy (copy_reg_t *crt, struct cp_
+       if (co->double_buffer) aio_buf = !aio_buf;
+     }
+ 
+-  if (waiol[0] != NULL)
+-    aio_suspend((const struct aiocb * const *) waiol, 1, NULL);
++  if (waiol[0] != NULL) {
++    while (1) {
++        // wait for final asynchronous write to complete
++        while (aio_suspend((const struct aiocb * const *) waiol, 1, NULL) && errno == EINTR);
++        ssize_t n_write = aio_return(waiol[0]);
++        if (n_write < 0 && errno == EINTR ||
++                n_write >= 0 && n_write < waiol[0]->aio_nbytes) {
++            // retry if write interrupted or short write
++            if (aio_write(waiol[0]) < 0) {
++                error (0, errno, _("failed to initiate aio_write: %s"),
++                    quote (crt->dst_name));
++                return false;
++            }
++            continue;
++        } else if (n_write < 0) {
++            // abort if write error
++            error (0, errno, _("writing %s"), quote (crt->dst_name));
++            return false;
++        }
++        break;
++    }
+ #ifdef POSIX_FADV_DONTNEED
+-  if (co->fadvise_write) {
+-    sync_file_range(crt->dst_fd, waiol[0]->aio_offset, waiol[0]->aio_nbytes,
+-        SYNC_FILE_RANGE_WRITE|SYNC_FILE_RANGE_WAIT_AFTER);
+-    posix_fadvise(crt->dst_fd, waiol[0]->aio_offset, waiol[0]->aio_nbytes,
+-        POSIX_FADV_DONTNEED);
++    if (co->fadvise_write) {
++# ifdef __linux__
++        sync_file_range(crt->dst_fd, waiol[0]->aio_offset, waiol[0]->aio_nbytes,
++            SYNC_FILE_RANGE_WRITE|SYNC_FILE_RANGE_WAIT_AFTER);
++# endif
++        posix_fadvise(crt->dst_fd, waiol[0]->aio_offset, waiol[0]->aio_nbytes,
++            POSIX_FADV_DONTNEED);
+     }
+ #endif
++  }
+ // < PZK
+ 
+   return true;
+@@ -682,7 +728,8 @@ extent_copy (copy_reg_t *crt, struct cp_
+                   || (!empty_extent && sparse_mode != SPARSE_NEVER))
+                 {
+ // PZK >
+-                  if (lseek (crt->dst_fd, ext_start, SEEK_SET) < 0)
++                  if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                            ext_start, SEEK_SET) < 0)
+                     {
+                       error (0, errno, _("cannot lseek %s"), quote (crt->dst_name));
+ // < PZK
+@@ -699,7 +746,13 @@ extent_copy (copy_reg_t *crt, struct cp_
+                   if (empty_extent)
+ // PZK >
+                     nzeros = MIN (crt->stop_offset - dest_pos, hole_size);
+-
++                    // when double buffering, dst_fd may not even be set
++                    if (co->double_buffer && lseek(crt->dst_fd,
++                            crt->dst_offset - crt->start_offset +
++                            crt->stop_offset - nzeros, SEEK_SET) < 0L) {
++                        error (0, errno, _("cannot lseek %s"), quote (crt->dst_name));
++                        goto fail;
++                    }
+                   if (! write_zeros (crt->dst_fd, nzeros))
+                     {
+                       error (0, errno, _("%s: write failed"), quote (crt->dst_name));
+@@ -790,25 +843,30 @@ extent_copy (copy_reg_t *crt, struct cp_
+      here in order to record the proper length in the destination.  */
+ 
+ // PZK >
+-  if (wrote_hole_at_eof && crt->dst_offset == 0 &&
+-      crt->stop_offset == src_total_size &&
+-      (sparse_mode != SPARSE_NEVER
+-          ? ftruncate (crt->dst_fd, src_total_size)
+-          : ! write_zeros (crt->dst_fd, src_total_size - dest_pos)))
+-    {
+-      error (0, errno, _("failed to extend %s"), quote (crt->dst_name));
+-      return false;
+-    }
+-  else if (wrote_hole_at_eof && crt->split + 1 == crt->nsplits &&
+-      (lseek (crt->dst_fd, (off_t) -1, SEEK_CUR) < 0L
+-       || co->write_mode
+-       && fcntl (crt->dst_fd, F_SETFL,
+-          fcntl (crt->dst_fd, F_GETFL) & ~O_DIRECT)
+-       || full_write (crt->dst_fd, "", 1) != 1))
+-    {
+-      error (0, errno, _("writing %s"), quote (crt->dst_name));
+-      return false;
++  if (wrote_hole_at_eof || dest_pos < crt->stop_offset) {
++    if (sparse_mode == SPARSE_NEVER) {
++        if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                dest_pos, SEEK_SET) < 0L ||
++                !write_zeros(crt->dst_fd, crt->stop_offset - dest_pos)) {
++            error (0, errno, _("%s: write failed"), quote (crt->dst_name));
++            return false;
++        }
++    } else if (crt->dst_offset == 0 && crt->stop_offset == src_total_size) {
++        if (ftruncate(crt->dst_fd, src_total_size)) {
++            error (0, errno, _("failed to extend %s"), quote (crt->dst_name));
++            return false;
++        }
++    } else if (crt->split + 1 == crt->nsplits) {
++        if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                crt->stop_offset - 1, SEEK_SET) < 0L ||
++                co->write_mode && fcntl (crt->dst_fd, F_SETFL,
++                    fcntl (crt->dst_fd, F_GETFL) & ~O_DIRECT) ||
++                full_write (crt->dst_fd, "", 1) != 1) {
++            error (0, errno, _("%s: write failed"), quote (crt->dst_name));
++            return false;
++        }
+     }
++  }
+ 
+ #if HAVE_LIBGCRYPT
+   if (dest_pos < crt->stop_offset) {
+@@ -1395,27 +1453,36 @@ copy_reg_task (copy_reg_t *crt, struct c
+                          , &ctx, &htt
+ #endif
+                        );
+-    if (copy_ok && wrote_hole_at_eof && crt->dst_offset == 0 &&
+-        crt->stop_offset == src_open_sb.st_size &&
+-        ftruncate (crt->dst_fd, src_open_sb.st_size) < 0)
+-      {
+-        error (0, errno, _("failed to extend %s"), quote (crt->dst_name));
+-        return_val = false;
+-        goto task_close_src_and_dst_desc;
+-      }
+-    else if (copy_ok && wrote_hole_at_eof && crt->split + 1 == crt->nsplits &&
+-        (lseek (crt->dst_fd, (off_t) -1, SEEK_CUR) < 0L
+ // PZK >
+-         || co->write_mode
+-         && fcntl (crt->dst_fd, F_SETFL,
+-            fcntl (crt->dst_fd, F_GETFL) & ~O_DIRECT)
++    off_t dest_pos = crt->start_offset + n_read;
++    if (copy_ok && (wrote_hole_at_eof || dest_pos < crt->stop_offset)) {
++        if (co->sparse_mode == SPARSE_NEVER) {
++            if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                    dest_pos, SEEK_SET) < 0L ||
++                    !write_zeros(crt->dst_fd, crt->stop_offset - dest_pos)) {
++                error (0, errno, _("%s: write failed"), quote (crt->dst_name));
++                return_val = false;
++                goto task_close_src_and_dst_desc;
++            }
++        } else if (crt->dst_offset == 0 && crt->stop_offset == src_open_sb.st_size) {
++            if (ftruncate(crt->dst_fd, src_open_sb.st_size)) {
++                error (0, errno, _("failed to extend %s"), quote (crt->dst_name));
++                return_val = false;
++                goto task_close_src_and_dst_desc;
++            }
++        } else if (crt->split + 1 == crt->nsplits) {
++            if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                    crt->stop_offset - 1, SEEK_SET) < 0L ||
++                    co->write_mode && fcntl (crt->dst_fd, F_SETFL,
++                        fcntl (crt->dst_fd, F_GETFL) & ~O_DIRECT) ||
++                    full_write (crt->dst_fd, "", 1) != 1) {
++                error (0, errno, _("%s: write failed"), quote (crt->dst_name));
++                return_val = false;
++                goto task_close_src_and_dst_desc;
++            }
++        }
++    }
+ // < PZK
+-         || full_write (crt->dst_fd, "", 1) != 1))
+-      {
+-        error (0, errno, _("writing %s"), quote (crt->dst_name));
+-        return_val = false;
+-        goto task_close_src_and_dst_desc;
+-      }
+ 
+ task_preserve_metadata:
+   if (co->preserve_timestamps)
+@@ -1650,7 +1717,7 @@ copy_reg (char const *src_name, char con
+                 scount = src_sb->st_size / 1000000000 * x->stripe_count + 1;
+             }
+         }
+-        if (scount > LOV_MAX_STRIPE_COUNT) scount = LOV_MAX_STRIPE_COUNT;
++        if (scount > MUTIL_MAX_STRIPE_COUNT) scount = MUTIL_MAX_STRIPE_COUNT;
+         if (!llapi_file_create(dst_name, ssize, -1, scount, 0)) {
+             dest_desc = open (dst_name, open_flags | O_LOV_DELAY_CREATE,
+                 wdst_mode & ~omitted_permissions);
+diff -rupN old1/src/cp.c new/src/cp.c
+--- old1/src/cp.c	2015-01-08 11:39:44.623481996 -0800
++++ new/src/cp.c	2016-04-14 15:25:51.892490795 -0700
+@@ -106,7 +106,6 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
+ #if HAVE_LIBGNUTLS && defined(_OPENMP)
+ # include <arpa/inet.h>
+ # include <gnutls/gnutls.h>
+-# include <gnutls/extra.h>
+ # include <netdb.h>
+ # include <poll.h>
+ # include <pthread.h>
+@@ -144,7 +143,7 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
+ 
+ /* The official name of this program (e.g., no 'g' prefix).  */
+ // PZK >
+-#define PROGRAM_NAME "mcp 1.822.1"
++#define PROGRAM_NAME "mcp 1.822.4"
+ 
+ #define AUTHORS \
+   proper_name_utf8 ("Torbjorn Granlund", "Torbj\303\266rn Granlund"), \
+@@ -1194,7 +1193,6 @@ do_copy (int n_files, char **file, const
+ # if HAVE_LIBGNUTLS
+   if (x->listen_port || x->mgr_port) {
+     gnutls_global_init();
+-    gnutls_global_init_extra();
+   }
+ # endif
+ 
+@@ -1212,7 +1210,7 @@ do_copy (int n_files, char **file, const
+       fprintf(stderr, _("      size        rd_mbs  wt_mbs  cp_mbs  %s\n"),
+         x->print_src ? "src" : "dst");
+       fprintf(stderr, _("      ----        ------  ------  ------  ---\n"));
+-      clock_gettime(CLOCK_REALTIME, &tts[0]);
++      clock_gettime(0, &tts[0]);
+     }
+     off_t tsize = 0;
+     int maxcrts = 128;
+@@ -1316,7 +1314,7 @@ do_copy (int n_files, char **file, const
+       }
+     }
+     if (x->print_stats) {
+-        clock_gettime(CLOCK_REALTIME, &tts[1]);
++        clock_gettime(0, &tts[1]);
+         double tt = (double) (
+             (double) tts[1].tv_sec + (double) tts[1].tv_nsec / (double) 1.0e9 -
+             (double) tts[0].tv_sec - (double) tts[0].tv_nsec / (double) 1.0e9);
+@@ -1370,7 +1368,8 @@ do_copy (int n_files, char **file, const
+         gnutls_init(&tls_sess, GNUTLS_CLIENT);
+         gnutls_priority_set_direct(tls_sess, "NORMAL:+SRP", NULL);
+         gnutls_credentials_set(tls_sess, GNUTLS_CRD_SRP, srp_cred);
+-        gnutls_transport_set_ptr(tls_sess, (gnutls_transport_ptr_t) sock);
++        gnutls_transport_set_ptr(tls_sess,
++            (gnutls_transport_ptr_t)(uintptr_t) sock);
+         if (gnutls_handshake(tls_sess) < 0) {
+             error(0, 0, _("unable to authenticate to server"));
+             //TODO: can this cause deadlocK?
+@@ -1502,7 +1501,8 @@ do_copy (int n_files, char **file, const
+         client_sock =
+             accept(server_sock, (struct sockaddr *) &client_sa, &client_len);
+         if (client_sock < 0) continue;
+-        gnutls_transport_set_ptr(tls_sess, (gnutls_transport_ptr_t) client_sock);
++        gnutls_transport_set_ptr(tls_sess,
++            (gnutls_transport_ptr_t)(uintptr_t) client_sock);
+         if (gnutls_handshake(tls_sess) < 0) {
+             close(client_sock);
+             gnutls_deinit(tls_sess);
+@@ -1874,10 +1874,10 @@ do_copy (int n_files, char **file, const
+       // indicate that file has been opened
+       sem_q_push(&open_q, NULL);
+       struct timespec ts[2];
+-      if (x->print_stats) clock_gettime(CLOCK_REALTIME, &ts[0]);
++      if (x->print_stats) clock_gettime(0, &ts[0]);
+       oks[tid] &= copy_reg_task(crt, x);
+       if (x->print_stats) {
+-        clock_gettime(CLOCK_REALTIME, &ts[1]);
++        clock_gettime(0, &ts[1]);
+         crt->copy_time = (double) (
+           (double) ts[1].tv_sec + (double) ts[1].tv_nsec / (double) 1.0e9 -
+           (double) ts[0].tv_sec - (double) ts[0].tv_nsec / (double) 1.0e9);
+@@ -2911,9 +2911,8 @@ main (int argc, char **argv)
+     error(0, 0, _("note: hash leaf size has been adjusted to the split size"));
+     x.hash_leaf_size = x.split_size;
+   }
+-  if (!x.hash_leaf_size) {
+-    error(0, 0, _("note: hash leaf size has been adjusted to 1GiB"));
+-    x.hash_leaf_size = 1024 * 1024 * 1024;
++  if (x.split_size > 0 && !x.hash_leaf_size) {
++    x.hash_leaf_size = x.split_size;
+   }
+   x.hash_size = gcry_md_get_algo_dlen(x.hash_type);
+ #endif
+diff -rupN old1/src/md5sum.c new/src/md5sum.c
+--- old1/src/md5sum.c	2015-01-08 11:39:58.207851203 -0800
++++ new/src/md5sum.c	2016-04-14 15:53:31.945968066 -0700
+@@ -128,7 +128,6 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
+ #if HAVE_LIBGNUTLS && defined(_OPENMP)
+ # include <arpa/inet.h>
+ # include <gnutls/gnutls.h>
+-# include <gnutls/extra.h>
+ # include <netdb.h>
+ # include <poll.h>
+ # include <pthread.h>
+@@ -140,7 +139,7 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
+ /* The official name of this program (e.g., no 'g' prefix).  */
+ #if HASH_ALGO_MD5
+ // PZK >
+-# define PROGRAM_NAME "msum 1.822.1"
++# define PROGRAM_NAME "msum 1.822.4"
+ // < PZK
+ # define DIGEST_TYPE_STRING "MD5"
+ # define DIGEST_STREAM md5_stream
+@@ -492,7 +491,8 @@ sum_task(sum_task_t *stt, struct sum_opt
+       ssize_t n_read;
+       if (aiol[0] != NULL) {
+         // this will be skipped during the first double buffer iteration
+-        aio_suspend((const struct aiocb * const *) aiol, 1, NULL);
++        // wait for previous asynchronous read to complete
++        while (aio_suspend((const struct aiocb * const *) aiol, 1, NULL) && errno == EINTR);
+         n_read = aio_return(aiol[0]);
+       } else {
+         off_t to_read = MIN(buf_size,
+@@ -510,7 +510,7 @@ sum_task(sum_task_t *stt, struct sum_opt
+                     quote (stt->src_name));
+         }
+ 
+-        if (so->print_stats) clock_gettime(CLOCK_REALTIME, &rts[0]);
++        if (so->print_stats) clock_gettime(0, &rts[0]);
+         n_read = read (src_fd, buf[aio_buf], to_read);
+ 
+         if (so->read_mode && align_read != 0) {
+@@ -524,7 +524,7 @@ sum_task(sum_task_t *stt, struct sum_opt
+       }
+ 
+       if (so->print_stats) {
+-        clock_gettime(CLOCK_REALTIME, &rts[1]);
++        clock_gettime(0, &rts[1]);
+         stt->read_time += (double) (
+             (double) rts[1].tv_sec + (double) rts[1].tv_nsec / (double) 1.0e9 -
+             (double) rts[0].tv_sec - (double) rts[0].tv_nsec / (double) 1.0e9);
+@@ -566,18 +566,22 @@ sum_task(sum_task_t *stt, struct sum_opt
+                     quote (stt->src_name));
+         }
+ 
+-        if (so->print_stats) clock_gettime(CLOCK_REALTIME, &rts[0]);
++        if (so->print_stats) clock_gettime(0, &rts[0]);
+         memset(&aio, 0, sizeof(struct aiocb));
+         aio.aio_fildes = src_fd;
+         aio.aio_offset = stt->start_offset + total_n_read;
+         aio.aio_buf = buf[!aio_buf];
+         aio.aio_nbytes = to_read;
+         aiol[0] = &aio;
+-        //TODO: error handling for bad aio_read
+-        aio_read(&aio);
++        if (aio_read(&aio) < 0) {
++            error (0, errno, _("failed to initiate aio_read: %s"),
++                quote (stt->src_name));
++            return_val = false;
++            goto task_close_src_and_dst_desc;
++        }
+       }
+ 
+-      if (so->print_stats) clock_gettime(CLOCK_REALTIME, &hts[0]);
++      if (so->print_stats) clock_gettime(0, &hts[0]);
+ #if HAVE_LIBGCRYPT
+        //TODO: is st_size right for partial files?
+       if (stt->nsplits > 1)
+@@ -586,7 +590,7 @@ sum_task(sum_task_t *stt, struct sum_opt
+         gcry_md_write(ctx, buf[aio_buf], n_read);
+ #endif
+       if (so->print_stats) {
+-        clock_gettime(CLOCK_REALTIME, &hts[1]);
++        clock_gettime(0, &hts[1]);
+         stt->hash_time += (double) (
+             (double) hts[1].tv_sec + (double) hts[1].tv_nsec / (double) 1.0e9 -
+             (double) hts[0].tv_sec - (double) hts[0].tv_nsec / (double) 1.0e9);
+@@ -1303,9 +1307,11 @@ digest_check (struct sum_options *x, con
+       if (line_length <= 0)
+         break;
+ 
+-      /* Ignore comment lines, which begin with a '#' character.  */
++// PZK >
++      /* Ignore comment lines, which begin with a '#' character.
+       if (line[0] == '#')
+-        continue;
++        continue;*/
++// < PZK
+ 
+       /* Remove any trailing newline.  */
+       if (line[line_length - 1] == '\n')
+@@ -1830,10 +1836,8 @@ main (int argc, char **argv)
+   if (x.split_size > 0 && x.split_size < x.hash_leaf_size) {
+     error(0, 0, _("Note: hash leaf size has been adjusted to the split size"));
+     x.hash_leaf_size = x.split_size;
+-  }
+-  if (!x.hash_leaf_size) {
+-    error(0, 0, _("Note: hash leaf size has been adjusted to 1GiB"));
+-    x.hash_leaf_size = 1024 * 1024 * 1024;
++  } else if (x.split_size > 0 && !x.hash_leaf_size) {
++    x.hash_leaf_size = x.split_size;
+   }
+   x.hash_size = gcry_md_get_algo_dlen(x.hash_type);
+   min_digest_line_length = 2 * x.hash_size + 2 + 1;
+@@ -1921,7 +1925,6 @@ main (int argc, char **argv)
+ # if HAVE_LIBGNUTLS
+   if (x.listen_port || x.mgr_port) {
+     gnutls_global_init();
+-    gnutls_global_init_extra();
+   }
+ #endif
+ 
+@@ -1938,7 +1941,7 @@ main (int argc, char **argv)
+     if (x.print_stats) {
+       fprintf(stderr, _("      size        rd_mbs  hs_mbs  sm_mbs  file\n"));
+       fprintf(stderr, _("      ----        ------  ------  ------  ----\n"));
+-      clock_gettime(CLOCK_REALTIME, &tts[0]);
++      clock_gettime(0, &tts[0]);
+     }
+     off_t tsize = 0;
+     int maxstts = 128;
+@@ -2047,7 +2050,7 @@ main (int argc, char **argv)
+       }
+     }
+      if (x.print_stats) {
+-        clock_gettime(CLOCK_REALTIME, &tts[1]);
++        clock_gettime(0, &tts[1]);
+         double tt = (double) (
+             (double) tts[1].tv_sec + (double) tts[1].tv_nsec / (double) 1.0e9 -
+             (double) tts[0].tv_sec - (double) tts[0].tv_nsec / (double) 1.0e9);
+@@ -2101,7 +2104,8 @@ main (int argc, char **argv)
+         gnutls_init(&tls_sess, GNUTLS_CLIENT);
+         gnutls_priority_set_direct(tls_sess, "NORMAL:+SRP", NULL);
+         gnutls_credentials_set(tls_sess, GNUTLS_CRD_SRP, srp_cred);
+-        gnutls_transport_set_ptr(tls_sess, (gnutls_transport_ptr_t) sock);
++        gnutls_transport_set_ptr(tls_sess,
++            (gnutls_transport_ptr_t)(uintptr_t) sock);
+         if (gnutls_handshake(tls_sess) < 0) {
+             error(0, 0, _("unable to authenticate to server"));
+             //TODO: can this cause deadlocK?
+@@ -2233,7 +2237,8 @@ main (int argc, char **argv)
+         client_sock =
+             accept(server_sock, (struct sockaddr *) &client_sa, &client_len);
+         if (client_sock < 0) continue;
+-        gnutls_transport_set_ptr(tls_sess, (gnutls_transport_ptr_t) client_sock);
++        gnutls_transport_set_ptr(tls_sess,
++            (gnutls_transport_ptr_t)(uintptr_t) client_sock);
+          if (gnutls_handshake(tls_sess) < 0) {
+             error(0, 0, _("warning: failed authentication attempt from %s:%d"),
+                 inet_ntoa(client_sa.sin_addr), ntohs(client_sa.sin_port));
+@@ -2555,10 +2560,10 @@ main (int argc, char **argv)
+     sum_task_t *stt;
+     while ((stt = sem_q_pop(&task_q)) != NULL) {
+       struct timespec ts[2];
+-      if (x.print_stats) clock_gettime(CLOCK_REALTIME, &ts[0]);
++      if (x.print_stats) clock_gettime(0, &ts[0]);
+       oks[tid] &= sum_task(stt, &x);
+       if (x.print_stats) {
+-        clock_gettime(CLOCK_REALTIME, &ts[1]);
++        clock_gettime(0, &ts[1]);
+         stt->sum_time = (double) (
+           (double) ts[1].tv_sec + (double) ts[1].tv_nsec / (double) 1.0e9 -
+           (double) ts[0].tv_sec - (double) ts[0].tv_nsec / (double) 1.0e9);
+diff -rupN old1/src/mutil-q.h new/src/mutil-q.h
+--- old1/src/mutil-q.h	2015-01-08 12:14:38.144404708 -0800
++++ new/src/mutil-q.h	2015-01-14 14:59:20.951709344 -0800
+@@ -81,16 +81,16 @@
+ #ifndef MUTIL_Q_H
+ # define MUTIL_Q_H
+ 
+-# include <semaphore.h>
++# include <sys/types.h>
++# include <sys/ipc.h>
++# include <sys/sem.h>
+ 
+ /////////////////////////
+ //// Semaphore Queue ////
+ /////////////////////////
+ 
+ typedef struct {
+-    sem_t max_sem;
+-    sem_t min_sem;
+-    sem_t q_lock;
++    int sem_id;
+     int size;
+     size_t ptr_size;
+     int i_read;
+diff -rupN old1/src/mutil.c new/src/mutil.c
+--- old1/src/mutil.c	2014-05-13 13:56:49.674541206 -0700
++++ new/src/mutil.c	2015-01-14 14:59:25.975845779 -0800
+@@ -79,7 +79,17 @@
+ */
+ 
+ #include "mutil.h"
+-#include <semaphore.h>
++
++#ifndef CLOCK_REALTIME
++int clock_gettime(int clk_id, struct timespec* t) {
++    struct timeval now;
++    int rv = gettimeofday(&now, NULL);
++    if (rv) return rv;
++    t->tv_sec  = now.tv_sec;
++    t->tv_nsec = now.tv_usec * 1000;
++    return 0;
++}
++#endif
+ 
+ ///////////////////
+ //// Hash Tree ////
+@@ -197,9 +207,17 @@ void hash_leaf(hash_tree_t *htt, copy_re
+ /////////////////////////
+ 
+ void sem_q_init(sem_q_t *q, int size, size_t ptr_size) {
+-    sem_init(&q->max_sem, 0, size);
+-    sem_init(&q->min_sem, 0, 0);
+-    sem_init(&q->q_lock, 0, 1);
++    q->sem_id = semget(0, 3, IPC_PRIVATE | IPC_CREAT | 0600);
++
++    // max_sem
++    semctl(q->sem_id, 0, SETVAL, size);
++
++    // min_sem
++    semctl(q->sem_id, 1, SETVAL, 0);
++
++    // q_lock
++    semctl(q->sem_id, 2, SETVAL, 1);
++
+     q->i_read = 0;
+     q->i_write = 0;
+     q->size = size;
+@@ -209,27 +227,58 @@ void sem_q_init(sem_q_t *q, int size, si
+ 
+ void sem_q_destroy(sem_q_t *q) {
+     free(q->vals);
+-    sem_destroy(&q->q_lock);
+-    sem_destroy(&q->min_sem);
+-    sem_destroy(&q->max_sem);
++    semctl(q->sem_id, 0, IPC_RMID);
+ }
+ 
+ void sem_q_push(sem_q_t *q, void *val) {
+-    sem_wait(&q->max_sem);
+-    sem_wait(&q->q_lock);
++    struct sembuf sb;
++    sb.sem_flg = 0;
++
++    // wait max_sem
++    sb.sem_num = 0;
++    sb.sem_op = -1;
++    semop(q->sem_id, &sb, 1);
++
++    // wait q_lock
++    sb.sem_num = 2;
++    semop(q->sem_id, &sb, 1);
++
+     q->vals[q->i_write] = val;
+     q->i_write = (q->i_write + 1) % q->size;
+-    sem_post(&q->q_lock);
+-    sem_post(&q->min_sem);
++
++    // post q_lock
++    sb.sem_op = 1;
++    semop(q->sem_id, &sb, 1);
++
++    // post min_sem
++    sb.sem_num = 1;
++    semop(q->sem_id, &sb, 1);
+ }
+ 
+ void *sem_q_pop(sem_q_t *q) {
+-    sem_wait(&q->min_sem);
+-    sem_wait(&q->q_lock);
++    struct sembuf sb;
++    sb.sem_flg = 0;
++
++    // wait min_sem
++    sb.sem_num = 1;
++    sb.sem_op = -1;
++    semop(q->sem_id, &sb, 1);
++
++    // wait q_lock
++    sb.sem_num = 2;
++    semop(q->sem_id, &sb, 1);
++
+     void *val = q->vals[q->i_read];
+     q->i_read = (q->i_read + 1) % q->size;
+-    sem_post(&q->q_lock);
+-    sem_post(&q->max_sem);
++
++    // post q_lock
++    sb.sem_op = 1;
++    semop(q->sem_id, &sb, 1);
++
++    // post max_sem
++    sb.sem_num = 0;
++    semop(q->sem_id, &sb, 1);
++
+     return val;
+ }
+ 
+@@ -254,7 +303,6 @@ int sem_q_size(sem_q_t *q) {
+ # include <gcrypt.h>
+ # include <pwd.h>
+ # include <gnutls/gnutls.h>
+-# include <gnutls/extra.h>
+ # include <unistd.h>
+ 
+ static int generate_create_conf(char *tpasswd_conf) {
+diff -rupN old1/src/mutil.h new/src/mutil.h
+--- old1/src/mutil.h	2014-05-13 13:56:49.674541206 -0700
++++ new/src/mutil.h	2015-01-14 14:59:31.535996768 -0800
+@@ -90,6 +90,11 @@
+ # include "copy.h"
+ # include "mutil-q.h"
+ 
++#ifndef CLOCK_REALTIME
++# include <sys/time.h>
++int clock_gettime(int clk_id, struct timespec* t);
++#endif
++
+ ///////////////////
+ //// Hash Tree ////
+ ///////////////////

@@ -1,0 +1,249 @@
+Mutil Installation
+==================
+
+1. Prerequisites
+
+    o GNU coreutils 8.22
+
+        The Mutil patch is only applicable against coreutils 8.22.
+
+    o Compiler with OpenMP support
+
+        For example, the GNU C Compiler >= 4.2 or Intel C Compiler >= 9.1.
+        Note that the default gcc 4.2.1 on OSX does not support OpenMP
+        for some reason.  Tested with gcc 4.4.4 on Linux and 4.9.1 on OSX.
+
+    o GNU TLS library (optional but required for multi-node TCP support)
+
+        Tested with gnutls 2.8.6/2.10.5/3.3.11 (using --with-included-tasn1).
+        Note that CentOS and RHEL may include versions of gnutls with
+        the required SRP functionality removed (due to potential patent
+        issues).  In those cases, gnutls must be built from source.
+        Also note that a static version of libz is required when Mutil
+        is configured with --with-static-gcrypt, which may be missing on
+        CentOS/RHEL systems and may result in unusual configure output
+        (e.g. "could not determine how to read list of mounted file
+        systems").
+
+    o Libgcrypt library (optional but required for hashing support)
+
+        Note that msum is not functional without this, but mcp is still
+        usable.  Tested with libgcrypt 1.4.5/1.6.2.
+
+    o Libgpg-error library (optional but required for hashing support)
+
+        Note that if Mutil is configured with --with-static-gcrypt,
+        libgpg-error must be configured with --enable-static to ensure
+        that the static version of this library exists.  In this case,
+        libgpg-error should be built before libgcrypt, which should be
+        built before gnutls.  Tested with libgpg-error 1.7/1.17.
+
+    o MPI library (optional but required for multi-node MPI support)
+
+        Tested with SGI Message Passing Toolkit 1.25/1.26/2.11r13.
+
+
+2. Installation
+
+    Note that while coreutils compiles on many types of systems, Mutil
+    has only been tested on Linux and OSX.  It is unknown if it will
+    compile and/or operate properly on other types of systems.
+
+    2.1. Preparation
+
+        2.1.1. New Installation
+
+            Mutil is created by applying the "coreutils-8.22" patch to an
+            unpacked coreutils 8.22 distribution.  This is done via the
+            "patch" command:
+
+                cd coreutils-8.22
+                patch -p1 < /path/to/patch/coreutils-8.22.patch
+
+            The output should be similar to the following:
+
+                patching file COPYING
+                patching file Makefile.in
+                patching file aclocal.m4
+                patching file configure
+                patching file gnulib-tests/Makefile.in
+                patching file lib/config.hin
+                patching file m4/gnulib-common.m4
+                patching file m4/mutil.m4
+                patching file src/copy.c
+                patching file src/copy.h
+                patching file src/cp.c
+                patching file src/extent-scan.c
+                patching file src/extent-scan.h
+                patching file src/local.mk
+                patching file src/md5sum.c
+                patching file src/mutil-q.h
+                patching file src/mutil.c
+                patching file src/mutil.h
+                patching file tests/cp/backup-is-src.sh
+
+        2.1.2. Upgrade Installation
+
+            If you have previously patched coreutils 8.22 to produce
+            Mutil 1.822.N, you may upgrade to the latest by applying
+            the corresponding "mutil-1.822.N" patch:
+
+                cd coreutils-8.22
+                patch -p1 < /path/to/patch/mutil-1.822.N.patch
+
+            The output should be the following for Mutil 1.822.1:
+
+                patching file configure
+                patching file lib/config.hin
+                patching file m4/gnulib-common.m4
+                patching file m4/mutil.m4
+                patching file src/copy.c
+                patching file src/cp.c
+                patching file src/md5sum.c
+                patching file src/mutil-q.h
+                patching file src/mutil.c
+                patching file src/mutil.h
+
+            The output should be the following for Mutil 1.822.2:
+
+                patching file src/copy.c
+                patching file src/cp.c
+                patching file src/md5sum.c
+
+            The output should be the following for Mutil 1.822.3:
+
+                patching file src/copy.c
+                patching file src/cp.c
+                patching file src/md5sum.c
+
+    2.2. Configuration
+
+        Mutil supports auto-detection of its prerequisites through the
+        normal "configure" process.  If any prerequisites are installed
+        in non-standard locations, you must set CFLAGS and LDFLAGS
+        before invoking configure.  For example (using sh syntax):
+
+            export CFLAGS=-I/my/include
+            export LDFLAGS=-L/my/lib
+
+        would search for additional include files in /my/include and
+        additional libraries in /my/lib.  Note that gnutls and libgcrypt
+        are statically linked into the executables so need only be
+        available during compilation.
+        
+        For OpenMP and/or MPI libraries that are in non-standard
+        locations, but accessible by all users, a run-time path can be
+        supplied to the linker so users do not need to set environment
+        variables such as LD_LIBRARY_PATH.  For example:
+
+            export LDFLAGS=-L/gcc/4.4.4/lib64 -lgomp -Wl,-rpath /gcc/4.4.4/lib64'
+
+        would always search for the gcc OpenMP libraries in /gcc/4.4.4/lib64
+        even if that path is not in the user's or system's environment.
+
+        The default values of some options can be changed by adding
+        additional definitions into CFLAGS.  The following settings
+        may be configured at compile-time (defaults in brackets):
+
+            DEFAULT_BUFFER_SIZE     [4] (MB)
+            DEFAULT_DIRECT_READ     [0]
+            DEFAULT_DIRECT_WRITE    [0]
+            DEFAULT_DOUBLE_BUFFER   [0]
+            DEFAULT_FADVISE_READ    [0]
+            DEFAULT_FADVISE_WRITE   [0]
+            DEFAULT_HASH_TYPE       [GCRY_MD_MD5]
+            DEFAULT_LUSTRE_STRIPES  [1]
+            DEFAULT_SPLIT_SIZE      [0] (MB)
+            DEFAULT_THREADS         [4]
+
+        For example:
+
+            export CFLAGS="-I/my/include -DDEFAULT_BUFFER_SIZE=1"
+
+        would set the default buffer size to 1 MB.
+
+        Note that no validation is done on default parameters so make
+        sure they conform to expected values.  Namely, the split size
+        should be a non-negative integer, the buffer size and number of
+        threads should be positive integers, and the direct read, direct
+        write, double buffer, fadvise read, and fadvise write values
+        should be 0 or 1.  The default hash type must be a Libgcrypt
+        definition beginning with "GCRY_" corresponding to a supported
+        hash defined in gcrypt.h.  The default lustre stripes setting
+        should match the configured lustre stripe count default.
+
+        Also note that setting the default split size to any value
+        besides zero breaks drop-in compatibility of the hashing
+        functionality as files larger than this size will produce a
+        sum based on a hash tree instead of a plain hash.  The benefit
+        of using a non-zero split size is that performance can be
+        increased dramatically on large files by default.
+
+        Some file systems do not support direct I/O so care should be
+        taken enabling it by default.  Note that if any of direct read,
+        direct write, double buffer, fadvise read, or fadvise write is
+        enabled by default, the corresponding command-line options will
+        become --no-direct-read, --no-direct-write, --no-double-buffer,
+        --no-fadvise-read, and --no-fadvise-write.
+
+        Once the environment has been configured, run:
+
+            ./configure
+
+        To statically link libgcrypt, libgpg-error, and gnutls (if
+        available) into the resulting executables so they only need to
+        exist on the build system, use:
+
+            ./configure --with-static-gcrypt
+
+        Otherwise, these dependencies must exist as shared libraries
+        on any system on which mcp/msum are invoked.  See notes in
+        "Prerequisites" section regarding the use of --with-static-gcrypt.
+        Run "./configure --help" for additional configuration options.
+
+    2.3. Compilation
+
+        To compile, run:
+
+            make
+
+        Mutil does not rename the resulting files, so after compilation:
+        
+            o src/cp is the mcp executable
+            o src/md5sum is the msum executable
+            o man/cp.1 is the mcp man file
+            o man/md5sum.1 is the msum man file
+
+        The options listed in the man pages and when the executables are
+        run with "--help" will vary depending on which prerequisites
+        were available during the build process.
+
+    2.4. Installation
+
+        *DO NOT* run "make install".  It is unknown and untested whether
+        or not the Mutil modifications affect the behavior of other
+        coreutils components so is safest to install Mutil manually by
+        copying the executables and man files to the appropriate
+        directories.  For example, to install to "/usr/local", use:
+
+            cp src/cp /usr/local/bin/mcp
+            cp src/md5sum /usr/local/bin/msum
+            cp man/cp.1 /usr/local/man/man1/mcp.1
+            cp man/md5sum.1 /usr/local/man/man1/msum.1
+
+        Note that in this example, the files have been renamed to
+        mcp/msum.  Alternatively, these files can be copied to the
+        default system locations to transparently obtain Mutil
+        performance benefits, but this should only be done after
+        validating their behavior within the target environment.
+        
+        If the system md5sum is going to be replaced, it is advised to
+        keep the DEFAULT_SPLIT_SIZE setting at zero to ensure that
+        externally computed md5sum checksums will match locally computed
+        values by default.  Note that this will negatively affect the
+        default (i.e. "option-less") performance of single file
+        copies, however, since each file will be single-threaded unless
+        a positive --split-size value is explicitly specified
+        (multi-file copies will still operate in multi-threaded fashion
+        by default).
+

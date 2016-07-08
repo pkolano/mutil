@@ -1,0 +1,298 @@
+diff -rupN old2/src/copy.c new/src/copy.c
+--- old2/src/copy.c	2015-01-14 15:03:11.117959493 -0800
++++ new/src/copy.c	2016-04-14 15:25:49.136481633 -0700
+@@ -308,11 +308,31 @@ sparse_copy (copy_reg_t *crt, struct cp_
+ 
+       ssize_t n_read;
+       if (raiol[0] != NULL) {
+-           // this will be skipped during the first double buffer iteration
+-          aio_suspend((const struct aiocb * const *) raiol, 1, NULL);
++          // this will be skipped during the first double buffer iteration
++          // wait for previous asynchronous read to complete
++          while (aio_suspend((const struct aiocb * const *) raiol, 1, NULL) && errno == EINTR);
+           if (co->print_stats) clock_gettime(0, &rts[1]);
+           if (waiol[0] != NULL) {
+-              aio_suspend((const struct aiocb * const *) waiol, 1, NULL);
++              while (1) {
++                // wait for previous asynchronous write to complete
++                while (aio_suspend((const struct aiocb * const *) waiol, 1, NULL) && errno == EINTR);
++                ssize_t n_write = aio_return(waiol[0]);
++                if (n_write < 0 && errno == EINTR ||
++                        n_write >= 0 && n_write < waiol[0]->aio_nbytes) {
++                    // retry if write interrupted or short write
++                    if (aio_write(waiol[0]) < 0) {
++                        error (0, errno, _("failed to initiate aio_write: %s"),
++                            quote (crt->dst_name));
++                        return false;
++                    }
++                    continue;
++                } else if (n_write < 0) {
++                    // abort if write error
++                    error (0, errno, _("writing %s"), quote (crt->dst_name));
++                    return false;
++                }
++                break;
++              }
+               if (co->print_stats) {
+                 clock_gettime(0, &wts[1]);
+                 crt->write_time += (double) (
+@@ -412,8 +432,11 @@ sparse_copy (copy_reg_t *crt, struct cp_
+         raio.aio_buf = buf[!aio_buf];
+         raio.aio_nbytes = to_read;
+         raiol[0] = &raio;
+-        //TODO: error handling for bad aio_read
+-        int rc = aio_read(&raio);
++        if (aio_read(&raio) < 0) {
++            error (0, errno, _("failed to initiate aio_read: %s"),
++                quote (crt->src_name));
++            return false;
++        }
+       }
+ // < PZK
+ 
+@@ -468,7 +491,11 @@ sparse_copy (copy_reg_t *crt, struct cp_
+             waio.aio_buf = buf[aio_buf];
+             waio.aio_nbytes = n;
+             waiol[0] = &waio;
+-            n_write = aio_write(&waio);
++            if (aio_write(&waio) < 0) {
++                error (0, errno, _("failed to initiate aio_write: %s"),
++                    quote (crt->dst_name));
++                return false;
++            }
+           } else {
+             n_write = full_write (crt->dst_fd, buf[aio_buf], n);
+             if (co->print_stats) {
+@@ -481,7 +508,6 @@ sparse_copy (copy_reg_t *crt, struct cp_
+             }
+           }
+ 
+-          //TODO: check wrote n bytes in double buffer case?
+           if (!co->double_buffer && n_write != n)
+             {
+               error (0, errno, _("writing %s"), quote (crt->dst_name));
+@@ -507,18 +533,38 @@ sparse_copy (copy_reg_t *crt, struct cp_
+       if (co->double_buffer) aio_buf = !aio_buf;
+     }
+ 
+-  if (waiol[0] != NULL)
+-    aio_suspend((const struct aiocb * const *) waiol, 1, NULL);
++  if (waiol[0] != NULL) {
++    while (1) {
++        // wait for final asynchronous write to complete
++        while (aio_suspend((const struct aiocb * const *) waiol, 1, NULL) && errno == EINTR);
++        ssize_t n_write = aio_return(waiol[0]);
++        if (n_write < 0 && errno == EINTR ||
++                n_write >= 0 && n_write < waiol[0]->aio_nbytes) {
++            // retry if write interrupted or short write
++            if (aio_write(waiol[0]) < 0) {
++                error (0, errno, _("failed to initiate aio_write: %s"),
++                    quote (crt->dst_name));
++                return false;
++            }
++            continue;
++        } else if (n_write < 0) {
++            // abort if write error
++            error (0, errno, _("writing %s"), quote (crt->dst_name));
++            return false;
++        }
++        break;
++    }
+ #ifdef POSIX_FADV_DONTNEED
+-  if (co->fadvise_write) {
++    if (co->fadvise_write) {
+ # ifdef __linux__
+-    sync_file_range(crt->dst_fd, waiol[0]->aio_offset, waiol[0]->aio_nbytes,
+-        SYNC_FILE_RANGE_WRITE|SYNC_FILE_RANGE_WAIT_AFTER);
++        sync_file_range(crt->dst_fd, waiol[0]->aio_offset, waiol[0]->aio_nbytes,
++            SYNC_FILE_RANGE_WRITE|SYNC_FILE_RANGE_WAIT_AFTER);
+ # endif
+-    posix_fadvise(crt->dst_fd, waiol[0]->aio_offset, waiol[0]->aio_nbytes,
+-        POSIX_FADV_DONTNEED);
++        posix_fadvise(crt->dst_fd, waiol[0]->aio_offset, waiol[0]->aio_nbytes,
++            POSIX_FADV_DONTNEED);
+     }
+ #endif
++  }
+ // < PZK
+ 
+   return true;
+@@ -682,7 +728,8 @@ extent_copy (copy_reg_t *crt, struct cp_
+                   || (!empty_extent && sparse_mode != SPARSE_NEVER))
+                 {
+ // PZK >
+-                  if (lseek (crt->dst_fd, ext_start, SEEK_SET) < 0)
++                  if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                            ext_start, SEEK_SET) < 0)
+                     {
+                       error (0, errno, _("cannot lseek %s"), quote (crt->dst_name));
+ // < PZK
+@@ -699,7 +746,13 @@ extent_copy (copy_reg_t *crt, struct cp_
+                   if (empty_extent)
+ // PZK >
+                     nzeros = MIN (crt->stop_offset - dest_pos, hole_size);
+-
++                    // when double buffering, dst_fd may not even be set
++                    if (co->double_buffer && lseek(crt->dst_fd,
++                            crt->dst_offset - crt->start_offset +
++                            crt->stop_offset - nzeros, SEEK_SET) < 0L) {
++                        error (0, errno, _("cannot lseek %s"), quote (crt->dst_name));
++                        goto fail;
++                    }
+                   if (! write_zeros (crt->dst_fd, nzeros))
+                     {
+                       error (0, errno, _("%s: write failed"), quote (crt->dst_name));
+@@ -790,25 +843,30 @@ extent_copy (copy_reg_t *crt, struct cp_
+      here in order to record the proper length in the destination.  */
+ 
+ // PZK >
+-  if (wrote_hole_at_eof && crt->dst_offset == 0 &&
+-      crt->stop_offset == src_total_size &&
+-      (sparse_mode != SPARSE_NEVER
+-          ? ftruncate (crt->dst_fd, src_total_size)
+-          : ! write_zeros (crt->dst_fd, src_total_size - dest_pos)))
+-    {
+-      error (0, errno, _("failed to extend %s"), quote (crt->dst_name));
+-      return false;
+-    }
+-  else if (wrote_hole_at_eof && crt->split + 1 == crt->nsplits &&
+-      (lseek (crt->dst_fd, (off_t) -1, SEEK_CUR) < 0L
+-       || co->write_mode
+-       && fcntl (crt->dst_fd, F_SETFL,
+-          fcntl (crt->dst_fd, F_GETFL) & ~O_DIRECT)
+-       || full_write (crt->dst_fd, "", 1) != 1))
+-    {
+-      error (0, errno, _("writing %s"), quote (crt->dst_name));
+-      return false;
++  if (wrote_hole_at_eof || dest_pos < crt->stop_offset) {
++    if (sparse_mode == SPARSE_NEVER) {
++        if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                dest_pos, SEEK_SET) < 0L ||
++                !write_zeros(crt->dst_fd, crt->stop_offset - dest_pos)) {
++            error (0, errno, _("%s: write failed"), quote (crt->dst_name));
++            return false;
++        }
++    } else if (crt->dst_offset == 0 && crt->stop_offset == src_total_size) {
++        if (ftruncate(crt->dst_fd, src_total_size)) {
++            error (0, errno, _("failed to extend %s"), quote (crt->dst_name));
++            return false;
++        }
++    } else if (crt->split + 1 == crt->nsplits) {
++        if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                crt->stop_offset - 1, SEEK_SET) < 0L ||
++                co->write_mode && fcntl (crt->dst_fd, F_SETFL,
++                    fcntl (crt->dst_fd, F_GETFL) & ~O_DIRECT) ||
++                full_write (crt->dst_fd, "", 1) != 1) {
++            error (0, errno, _("%s: write failed"), quote (crt->dst_name));
++            return false;
++        }
+     }
++  }
+ 
+ #if HAVE_LIBGCRYPT
+   if (dest_pos < crt->stop_offset) {
+@@ -1395,27 +1453,36 @@ copy_reg_task (copy_reg_t *crt, struct c
+                          , &ctx, &htt
+ #endif
+                        );
+-    if (copy_ok && wrote_hole_at_eof && crt->dst_offset == 0 &&
+-        crt->stop_offset == src_open_sb.st_size &&
+-        ftruncate (crt->dst_fd, src_open_sb.st_size) < 0)
+-      {
+-        error (0, errno, _("failed to extend %s"), quote (crt->dst_name));
+-        return_val = false;
+-        goto task_close_src_and_dst_desc;
+-      }
+-    else if (copy_ok && wrote_hole_at_eof && crt->split + 1 == crt->nsplits &&
+-        (lseek (crt->dst_fd, (off_t) -1, SEEK_CUR) < 0L
+ // PZK >
+-         || co->write_mode
+-         && fcntl (crt->dst_fd, F_SETFL,
+-            fcntl (crt->dst_fd, F_GETFL) & ~O_DIRECT)
++    off_t dest_pos = crt->start_offset + n_read;
++    if (copy_ok && (wrote_hole_at_eof || dest_pos < crt->stop_offset)) {
++        if (co->sparse_mode == SPARSE_NEVER) {
++            if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                    dest_pos, SEEK_SET) < 0L ||
++                    !write_zeros(crt->dst_fd, crt->stop_offset - dest_pos)) {
++                error (0, errno, _("%s: write failed"), quote (crt->dst_name));
++                return_val = false;
++                goto task_close_src_and_dst_desc;
++            }
++        } else if (crt->dst_offset == 0 && crt->stop_offset == src_open_sb.st_size) {
++            if (ftruncate(crt->dst_fd, src_open_sb.st_size)) {
++                error (0, errno, _("failed to extend %s"), quote (crt->dst_name));
++                return_val = false;
++                goto task_close_src_and_dst_desc;
++            }
++        } else if (crt->split + 1 == crt->nsplits) {
++            if (lseek (crt->dst_fd, crt->dst_offset - crt->start_offset +
++                    crt->stop_offset - 1, SEEK_SET) < 0L ||
++                    co->write_mode && fcntl (crt->dst_fd, F_SETFL,
++                        fcntl (crt->dst_fd, F_GETFL) & ~O_DIRECT) ||
++                    full_write (crt->dst_fd, "", 1) != 1) {
++                error (0, errno, _("%s: write failed"), quote (crt->dst_name));
++                return_val = false;
++                goto task_close_src_and_dst_desc;
++            }
++        }
++    }
+ // < PZK
+-         || full_write (crt->dst_fd, "", 1) != 1))
+-      {
+-        error (0, errno, _("writing %s"), quote (crt->dst_name));
+-        return_val = false;
+-        goto task_close_src_and_dst_desc;
+-      }
+ 
+ task_preserve_metadata:
+   if (co->preserve_timestamps)
+diff -rupN old2/src/cp.c new/src/cp.c
+--- old2/src/cp.c	2015-01-14 15:03:16.710111344 -0800
++++ new/src/cp.c	2016-04-14 15:25:51.892490795 -0700
+@@ -143,7 +143,7 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
+ 
+ /* The official name of this program (e.g., no 'g' prefix).  */
+ // PZK >
+-#define PROGRAM_NAME "mcp 1.822.2"
++#define PROGRAM_NAME "mcp 1.822.4"
+ 
+ #define AUTHORS \
+   proper_name_utf8 ("Torbjorn Granlund", "Torbj\303\266rn Granlund"), \
+diff -rupN old2/src/md5sum.c new/src/md5sum.c
+--- old2/src/md5sum.c	2015-01-14 15:03:26.770384522 -0800
++++ new/src/md5sum.c	2016-04-14 15:53:31.945968066 -0700
+@@ -139,7 +139,7 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
+ /* The official name of this program (e.g., no 'g' prefix).  */
+ #if HASH_ALGO_MD5
+ // PZK >
+-# define PROGRAM_NAME "msum 1.822.2"
++# define PROGRAM_NAME "msum 1.822.4"
+ // < PZK
+ # define DIGEST_TYPE_STRING "MD5"
+ # define DIGEST_STREAM md5_stream
+@@ -491,7 +491,8 @@ sum_task(sum_task_t *stt, struct sum_opt
+       ssize_t n_read;
+       if (aiol[0] != NULL) {
+         // this will be skipped during the first double buffer iteration
+-        aio_suspend((const struct aiocb * const *) aiol, 1, NULL);
++        // wait for previous asynchronous read to complete
++        while (aio_suspend((const struct aiocb * const *) aiol, 1, NULL) && errno == EINTR);
+         n_read = aio_return(aiol[0]);
+       } else {
+         off_t to_read = MIN(buf_size,
+@@ -572,8 +573,12 @@ sum_task(sum_task_t *stt, struct sum_opt
+         aio.aio_buf = buf[!aio_buf];
+         aio.aio_nbytes = to_read;
+         aiol[0] = &aio;
+-        //TODO: error handling for bad aio_read
+-        aio_read(&aio);
++        if (aio_read(&aio) < 0) {
++            error (0, errno, _("failed to initiate aio_read: %s"),
++                quote (stt->src_name));
++            return_val = false;
++            goto task_close_src_and_dst_desc;
++        }
+       }
+ 
+       if (so->print_stats) clock_gettime(0, &hts[0]);
