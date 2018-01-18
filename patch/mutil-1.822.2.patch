@@ -1,7 +1,63 @@
+diff -rupN old2/configure new/configure
+--- old2/configure	2015-01-14 15:14:48.000000000 -0800
++++ new/configure	2018-01-18 14:44:19.271960028 -0800
+@@ -8646,12 +8646,12 @@ fi
+     fi
+ 
+ 
+-    for ac_header in lustre/liblustreapi.h
++    for ac_header in lustre/lustreapi.h
+ do :
+-  ac_fn_c_check_header_mongrel "$LINENO" "lustre/liblustreapi.h" "ac_cv_header_lustre_liblustreapi_h" "$ac_includes_default"
+-if test "x$ac_cv_header_lustre_liblustreapi_h" = xyes; then :
++  ac_fn_c_check_header_mongrel "$LINENO" "lustre/lustreapi.h" "ac_cv_header_lustre_lustreapi_h" "$ac_includes_default"
++if test "x$ac_cv_header_lustre_lustreapi_h" = xyes; then :
+   cat >>confdefs.h <<_ACEOF
+-#define HAVE_LUSTRE_LIBLUSTREAPI_H 1
++#define HAVE_LUSTRE_LUSTREAPI_H 1
+ _ACEOF
+ 
+ fi
+diff -rupN old2/lib/config.hin new/lib/config.hin
+--- old2/lib/config.hin	2015-01-14 15:14:49.000000000 -0800
++++ new/lib/config.hin	2018-01-18 14:44:19.183957656 -0800
+@@ -1693,8 +1693,8 @@
+ /* Define to 1 if you have the `lstat' function. */
+ #undef HAVE_LSTAT
+ 
+-/* Define to 1 if you have the <lustre/liblustreapi.h> header file. */
+-#undef HAVE_LUSTRE_LIBLUSTREAPI_H
++/* Define to 1 if you have the <lustre/lustreapi.h> header file. */
++#undef HAVE_LUSTRE_LUSTREAPI_H
+ 
+ /* Define to 1 if you have the `lutimes' function. */
+ #undef HAVE_LUTIMES
+diff -rupN old2/m4/mutil.m4 new/m4/mutil.m4
+--- old2/m4/mutil.m4	2015-01-14 15:02:53.000000000 -0800
++++ new/m4/mutil.m4	2018-01-18 14:44:17.079900948 -0800
+@@ -84,7 +84,7 @@ AC_DEFUN([mutil_LIBGCRYPT], [
+ ])
+ 
+ AC_DEFUN([mutil_LIBLUSTREAPI], [
+-    AC_CHECK_HEADERS([lustre/liblustreapi.h])
++    AC_CHECK_HEADERS([lustre/lustreapi.h])
+     AC_CHECK_LIB([lustreapi], [llapi_file_get_stripe])
+ ])
+ 
 diff -rupN old2/src/copy.c new/src/copy.c
---- old2/src/copy.c	2015-01-14 15:03:11.117959493 -0800
-+++ new/src/copy.c	2016-04-14 15:25:49.136481633 -0700
-@@ -308,11 +308,31 @@ sparse_copy (copy_reg_t *crt, struct cp_
+--- old2/src/copy.c	2015-01-14 15:03:11.000000000 -0800
++++ new/src/copy.c	2018-01-18 14:44:17.935924020 -0800
+@@ -163,8 +163,7 @@ static inline int sync_file_range(
+ 
+ #if HAVE_LIBLUSTREAPI
+ # include <libgen.h>
+-# include <lustre/liblustreapi.h>
+-# include <lustre/lustre_user.h>
++# include <lustre/lustreapi.h>
+ # include <sys/statfs.h>
+ # define MAX_OSTS 1024
+ # define LOV_EA_SIZE(lum, num) (sizeof(*lum) + num * sizeof(*lum->lmm_objects))
+@@ -308,11 +307,31 @@ sparse_copy (copy_reg_t *crt, struct cp_
  
        ssize_t n_read;
        if (raiol[0] != NULL) {
@@ -36,7 +92,7 @@ diff -rupN old2/src/copy.c new/src/copy.c
                if (co->print_stats) {
                  clock_gettime(0, &wts[1]);
                  crt->write_time += (double) (
-@@ -412,8 +432,11 @@ sparse_copy (copy_reg_t *crt, struct cp_
+@@ -412,8 +431,11 @@ sparse_copy (copy_reg_t *crt, struct cp_
          raio.aio_buf = buf[!aio_buf];
          raio.aio_nbytes = to_read;
          raiol[0] = &raio;
@@ -50,7 +106,7 @@ diff -rupN old2/src/copy.c new/src/copy.c
        }
  // < PZK
  
-@@ -468,7 +491,11 @@ sparse_copy (copy_reg_t *crt, struct cp_
+@@ -468,7 +490,11 @@ sparse_copy (copy_reg_t *crt, struct cp_
              waio.aio_buf = buf[aio_buf];
              waio.aio_nbytes = n;
              waiol[0] = &waio;
@@ -63,7 +119,7 @@ diff -rupN old2/src/copy.c new/src/copy.c
            } else {
              n_write = full_write (crt->dst_fd, buf[aio_buf], n);
              if (co->print_stats) {
-@@ -481,7 +508,6 @@ sparse_copy (copy_reg_t *crt, struct cp_
+@@ -481,7 +507,6 @@ sparse_copy (copy_reg_t *crt, struct cp_
              }
            }
  
@@ -71,7 +127,7 @@ diff -rupN old2/src/copy.c new/src/copy.c
            if (!co->double_buffer && n_write != n)
              {
                error (0, errno, _("writing %s"), quote (crt->dst_name));
-@@ -507,18 +533,38 @@ sparse_copy (copy_reg_t *crt, struct cp_
+@@ -507,18 +532,38 @@ sparse_copy (copy_reg_t *crt, struct cp_
        if (co->double_buffer) aio_buf = !aio_buf;
      }
  
@@ -117,7 +173,7 @@ diff -rupN old2/src/copy.c new/src/copy.c
  // < PZK
  
    return true;
-@@ -682,7 +728,8 @@ extent_copy (copy_reg_t *crt, struct cp_
+@@ -682,7 +727,8 @@ extent_copy (copy_reg_t *crt, struct cp_
                    || (!empty_extent && sparse_mode != SPARSE_NEVER))
                  {
  // PZK >
@@ -127,7 +183,7 @@ diff -rupN old2/src/copy.c new/src/copy.c
                      {
                        error (0, errno, _("cannot lseek %s"), quote (crt->dst_name));
  // < PZK
-@@ -699,7 +746,13 @@ extent_copy (copy_reg_t *crt, struct cp_
+@@ -699,7 +745,13 @@ extent_copy (copy_reg_t *crt, struct cp_
                    if (empty_extent)
  // PZK >
                      nzeros = MIN (crt->stop_offset - dest_pos, hole_size);
@@ -142,7 +198,7 @@ diff -rupN old2/src/copy.c new/src/copy.c
                    if (! write_zeros (crt->dst_fd, nzeros))
                      {
                        error (0, errno, _("%s: write failed"), quote (crt->dst_name));
-@@ -790,25 +843,30 @@ extent_copy (copy_reg_t *crt, struct cp_
+@@ -790,25 +842,30 @@ extent_copy (copy_reg_t *crt, struct cp_
       here in order to record the proper length in the destination.  */
  
  // PZK >
@@ -191,7 +247,7 @@ diff -rupN old2/src/copy.c new/src/copy.c
  
  #if HAVE_LIBGCRYPT
    if (dest_pos < crt->stop_offset) {
-@@ -1395,27 +1453,36 @@ copy_reg_task (copy_reg_t *crt, struct c
+@@ -1395,27 +1452,36 @@ copy_reg_task (copy_reg_t *crt, struct c
                           , &ctx, &htt
  #endif
                         );
@@ -247,27 +303,90 @@ diff -rupN old2/src/copy.c new/src/copy.c
  
  task_preserve_metadata:
    if (co->preserve_timestamps)
+@@ -1651,19 +1717,15 @@ copy_reg (char const *src_name, char con
+             }
+         }
+         if (scount > MUTIL_MAX_STRIPE_COUNT) scount = MUTIL_MAX_STRIPE_COUNT;
+-        if (!llapi_file_create(dst_name, ssize, -1, scount, 0)) {
+-            dest_desc = open (dst_name, open_flags | O_LOV_DELAY_CREATE,
+-                wdst_mode & ~omitted_permissions);
+-            if (dest_desc && !llapi_file_get_stripe(dst_name, lum) &&
+-                    lum->lmm_stripe_count != scount) {
+-                //TODO: this probably shouldn't be printed for every
+-                //      file, especially when physical OST counts differ
+-                //      between file systems
+-                error(0, 0, _("warning: allocated stripe count of %s does not match original stripe count of %s"),
+-                    quote_n(0, dst_name), quote_n(1, src_name));
+-            }
+-        } else {
+-          dest_desc = -1;
++        dest_desc = llapi_file_open(dst_name, open_flags,
++                wdst_mode & ~omitted_permissions, ssize, -1, scount, 0);
++        if (dest_desc > 0 && !llapi_file_get_stripe(dst_name, lum) &&
++                lum->lmm_stripe_count != scount) {
++            //TODO: this probably shouldn't be printed for every
++            //      file, especially when physical OST counts differ
++            //      between file systems
++            error(0, 0, _("warning: allocated stripe count of %s does not match original stripe count of %s"),
++                quote_n(0, dst_name), quote_n(1, src_name));
+         }
+         free(lum);
+       } else
 diff -rupN old2/src/cp.c new/src/cp.c
---- old2/src/cp.c	2015-01-14 15:03:16.710111344 -0800
-+++ new/src/cp.c	2016-04-14 15:25:51.892490795 -0700
+--- old2/src/cp.c	2015-01-14 15:03:16.000000000 -0800
++++ new/src/cp.c	2018-01-18 14:44:17.939924128 -0800
 @@ -143,7 +143,7 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
  
  /* The official name of this program (e.g., no 'g' prefix).  */
  // PZK >
 -#define PROGRAM_NAME "mcp 1.822.2"
-+#define PROGRAM_NAME "mcp 1.822.4"
++#define PROGRAM_NAME "mcp 1.822.5"
  
  #define AUTHORS \
    proper_name_utf8 ("Torbjorn Granlund", "Torbj\303\266rn Granlund"), \
+@@ -1997,22 +1997,16 @@ do_copy (int n_files, char **file, const
+ // PZK >
+   else if (x->read_stdin)
+     {
+-      /* Start with a buffer larger than PATH_MAX, but beware of systems
+-         on which PATH_MAX is very large -- e.g., INT_MAX.  */
+-      size_t buf_max = MIN(2 * PATH_MAX, 32 * 1024);
+-      char *buf = xmalloc(buf_max);
++      char *buf = NULL;
++      size_t buf_max = 0;
+ 
+       char *new_dest;
+       char *source;
+       char *dest;
+       bool unused;
+ 
+-      while (fgets(buf, buf_max, stdin) != NULL) {
++      while (getline(&buf, &buf_max, stdin) > 0) {
+         buf[strcspn(buf, "\n")] = '\0';
+-        if (buf[0] == '\0') {
+-            //TODO: error handling if string too long
+-            continue;
+-        }
+         size_t ifile2 = strcspn(buf, " ");
+         if (buf[ifile2] == '\0') continue;
+         buf[ifile2++] = '\0';
+@@ -2123,6 +2117,7 @@ do_copy (int n_files, char **file, const
+         free(source);
+         free(dest);
+       }
++      free(buf);
+     }
+ // < PZK
+   else /* !target_directory */
 diff -rupN old2/src/md5sum.c new/src/md5sum.c
---- old2/src/md5sum.c	2015-01-14 15:03:26.770384522 -0800
-+++ new/src/md5sum.c	2016-04-14 15:53:31.945968066 -0700
+--- old2/src/md5sum.c	2015-01-14 15:03:26.000000000 -0800
++++ new/src/md5sum.c	2018-01-18 14:44:17.939924128 -0800
 @@ -139,7 +139,7 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
  /* The official name of this program (e.g., no 'g' prefix).  */
  #if HASH_ALGO_MD5
  // PZK >
 -# define PROGRAM_NAME "msum 1.822.2"
-+# define PROGRAM_NAME "msum 1.822.4"
++# define PROGRAM_NAME "msum 1.822.5"
  // < PZK
  # define DIGEST_TYPE_STRING "MD5"
  # define DIGEST_STREAM md5_stream
@@ -296,3 +415,30 @@ diff -rupN old2/src/md5sum.c new/src/md5sum.c
        }
  
        if (so->print_stats) clock_gettime(0, &hts[0]);
+@@ -2576,15 +2581,11 @@ main (int argc, char **argv)
+       char *file = argv[optind];
+ // PZK >
+       if (x.read_stdin) {
+-        size_t buf_max = MIN(PATH_MAX, 32 * 1024);
+-        char *buf = xmalloc(buf_max);
++        char *buf = NULL;
++        size_t buf_max = 0;
+ 
+-        while (fgets(buf, buf_max, stdin) != NULL) {
++        while (getline(&buf, &buf_max, stdin) > 0) {
+             buf[strcspn(buf, "\n")] = '\0';
+-            if (file[0] == '\0') {
+-                //TODO: error handling if string too long
+-                continue;
+-            }
+             size_t irange = strcspn(buf, " ");
+             if (buf[irange] == '\0') irange = 0;
+             else buf[irange++] = '\0';
+@@ -2611,6 +2612,7 @@ main (int argc, char **argv)
+                     ok = false;
+             }
+         }
++        free(buf);
+         break;
+       }
+ // < PZK

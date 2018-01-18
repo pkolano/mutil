@@ -88,3 +88,8 @@ CHANGES
 * Mutil 1.822.4 (04/14/16)
     - Fixed final file size in some cases when src ends with hole
     - Fixed --sparse=never corruption in some cases when --double-buffer enabled
+
+* Mutil 1.822.5 (01/18/18)
+    - Fixed preservation of execute permission on recent lustre versions
+    - Fixed compiler warnings for direct include of liblustreapi.h
+    - Fixed handling of long input lines when using --read-stdin

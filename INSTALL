@@ -116,6 +116,15 @@ Mutil Installation
                 patching file src/cp.c
                 patching file src/md5sum.c
 
+            The output should be the following for Mutil 1.822.4:
+
+                patching file configure
+                patching file lib/config.hin
+                patching file m4/mutil.m4
+                patching file src/copy.c
+                patching file src/cp.c
+                patching file src/md5sum.c
+
     2.2. Configuration
 
         Mutil supports auto-detection of its prerequisites through the
