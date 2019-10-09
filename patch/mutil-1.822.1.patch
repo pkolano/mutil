@@ -668,7 +668,7 @@ diff -rupN old1/src/copy.c new/src/copy.c
        } else
 diff -rupN old1/src/cp.c new/src/cp.c
 --- old1/src/cp.c	2015-01-08 11:39:44.000000000 -0800
-+++ new/src/cp.c	2018-01-18 14:44:17.939924128 -0800
++++ new/src/cp.c	2019-10-09 14:45:38.688430184 -0700
 @@ -106,7 +106,6 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
  #if HAVE_LIBGNUTLS && defined(_OPENMP)
  # include <arpa/inet.h>
@@ -682,7 +682,7 @@ diff -rupN old1/src/cp.c new/src/cp.c
  /* The official name of this program (e.g., no 'g' prefix).  */
  // PZK >
 -#define PROGRAM_NAME "mcp 1.822.1"
-+#define PROGRAM_NAME "mcp 1.822.5"
++#define PROGRAM_NAME "mcp 1.822.6"
  
  #define AUTHORS \
    proper_name_utf8 ("Torbjorn Granlund", "Torbj\303\266rn Granlund"), \
@@ -793,7 +793,7 @@ diff -rupN old1/src/cp.c new/src/cp.c
  #endif
 diff -rupN old1/src/md5sum.c new/src/md5sum.c
 --- old1/src/md5sum.c	2015-01-08 11:39:58.000000000 -0800
-+++ new/src/md5sum.c	2018-01-18 14:44:17.939924128 -0800
++++ new/src/md5sum.c	2019-10-09 14:45:27.456116389 -0700
 @@ -128,7 +128,6 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
  #if HAVE_LIBGNUTLS && defined(_OPENMP)
  # include <arpa/inet.h>
@@ -807,7 +807,7 @@ diff -rupN old1/src/md5sum.c new/src/md5sum.c
  #if HASH_ALGO_MD5
  // PZK >
 -# define PROGRAM_NAME "msum 1.822.1"
-+# define PROGRAM_NAME "msum 1.822.5"
++# define PROGRAM_NAME "msum 1.822.6"
  // < PZK
  # define DIGEST_TYPE_STRING "MD5"
  # define DIGEST_STREAM md5_stream
@@ -875,6 +875,15 @@ diff -rupN old1/src/md5sum.c new/src/md5sum.c
          stt->hash_time += (double) (
              (double) hts[1].tv_sec + (double) hts[1].tv_nsec / (double) 1.0e9 -
              (double) hts[0].tv_sec - (double) hts[0].tv_nsec / (double) 1.0e9);
+@@ -1057,7 +1061,7 @@ split_3 (char *s, size_t s_len,
+   i += digest_hex_bytes;
+ // PZK >
+   //TODO: put this in for checktree
+-  while (!ISWHITE (s[i]))
++  while (isxdigit(s[i]))
+     i++;
+ // < PZK
+   if (!ISWHITE (s[i]))
 @@ -1303,9 +1307,11 @@ digest_check (struct sum_options *x, con
        if (line_length <= 0)
          break;

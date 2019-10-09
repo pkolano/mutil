@@ -1,0 +1,33 @@
+diff -rupN old5/src/cp.c new/src/cp.c
+--- old5/src/cp.c	2018-01-18 14:44:17.939924128 -0800
++++ new/src/cp.c	2019-10-09 14:45:38.688430184 -0700
+@@ -143,7 +143,7 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
+ 
+ /* The official name of this program (e.g., no 'g' prefix).  */
+ // PZK >
+-#define PROGRAM_NAME "mcp 1.822.5"
++#define PROGRAM_NAME "mcp 1.822.6"
+ 
+ #define AUTHORS \
+   proper_name_utf8 ("Torbjorn Granlund", "Torbj\303\266rn Granlund"), \
+diff -rupN old5/src/md5sum.c new/src/md5sum.c
+--- old5/src/md5sum.c	2018-01-18 14:44:17.939924128 -0800
++++ new/src/md5sum.c	2019-10-09 14:45:27.456116389 -0700
+@@ -139,7 +139,7 @@ GCRY_THREAD_OPTION_PTHREAD_IMPL;
+ /* The official name of this program (e.g., no 'g' prefix).  */
+ #if HASH_ALGO_MD5
+ // PZK >
+-# define PROGRAM_NAME "msum 1.822.5"
++# define PROGRAM_NAME "msum 1.822.6"
+ // < PZK
+ # define DIGEST_TYPE_STRING "MD5"
+ # define DIGEST_STREAM md5_stream
+@@ -1061,7 +1061,7 @@ split_3 (char *s, size_t s_len,
+   i += digest_hex_bytes;
+ // PZK >
+   //TODO: put this in for checktree
+-  while (!ISWHITE (s[i]))
++  while (isxdigit(s[i]))
+     i++;
+ // < PZK
+   if (!ISWHITE (s[i]))

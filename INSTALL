@@ -235,10 +235,10 @@ Mutil Installation
         copying the executables and man files to the appropriate
         directories.  For example, to install to "/usr/local", use:
 
-            cp src/cp /usr/local/bin/mcp
-            cp src/md5sum /usr/local/bin/msum
-            cp man/cp.1 /usr/local/man/man1/mcp.1
-            cp man/md5sum.1 /usr/local/man/man1/msum.1
+            install -m 755 src/cp /usr/local/bin/mcp
+            install -m 755 src/md5sum /usr/local/bin/msum
+            install -m 644 man/cp.1 /usr/local/man/man1/mcp.1
+            install -m 644 man/md5sum.1 /usr/local/man/man1/msum.1
 
         Note that in this example, the files have been renamed to
         mcp/msum.  Alternatively, these files can be copied to the

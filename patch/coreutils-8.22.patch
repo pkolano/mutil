@@ -3383,7 +3383,7 @@ diff -rupN orig/src/copy.h new/src/copy.h
  #endif
 diff -rupN orig/src/cp.c new/src/cp.c
 --- orig/src/cp.c	2013-12-04 16:59:36.000000000 -0800
-+++ new/src/cp.c	2018-01-18 14:44:17.939924128 -0800
++++ new/src/cp.c	2019-10-09 14:45:38.688430184 -0700
 @@ -14,7 +14,69 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -3498,7 +3498,7 @@ diff -rupN orig/src/cp.c new/src/cp.c
  /* The official name of this program (e.g., no 'g' prefix).  */
 -#define PROGRAM_NAME "cp"
 +// PZK >
-+#define PROGRAM_NAME "mcp 1.822.5"
++#define PROGRAM_NAME "mcp 1.822.6"
  
  #define AUTHORS \
    proper_name_utf8 ("Torbjorn Granlund", "Torbj\303\266rn Granlund"), \
@@ -5427,7 +5427,7 @@ diff -rupN orig/src/local.mk new/src/local.mk
  
 diff -rupN orig/src/md5sum.c new/src/md5sum.c
 --- orig/src/md5sum.c	2013-12-04 06:48:30.000000000 -0800
-+++ new/src/md5sum.c	2018-01-18 14:44:17.939924128 -0800
++++ new/src/md5sum.c	2019-10-09 14:45:27.456116389 -0700
 @@ -14,7 +14,69 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
@@ -5541,7 +5541,7 @@ diff -rupN orig/src/md5sum.c new/src/md5sum.c
  #if HASH_ALGO_MD5
 -# define PROGRAM_NAME "md5sum"
 +// PZK >
-+# define PROGRAM_NAME "msum 1.822.5"
++# define PROGRAM_NAME "msum 1.822.6"
 +// < PZK
  # define DIGEST_TYPE_STRING "MD5"
  # define DIGEST_STREAM md5_stream
@@ -6240,7 +6240,7 @@ diff -rupN orig/src/md5sum.c new/src/md5sum.c
    i += digest_hex_bytes;
 +// PZK >
 +  //TODO: put this in for checktree
-+  while (!ISWHITE (s[i]))
++  while (isxdigit(s[i]))
 +    i++;
 +// < PZK
    if (!ISWHITE (s[i]))

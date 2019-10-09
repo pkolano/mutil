@@ -93,3 +93,6 @@ CHANGES
     - Fixed preservation of execute permission on recent lustre versions
     - Fixed compiler warnings for direct include of liblustreapi.h
     - Fixed handling of long input lines when using --read-stdin
+
+* Mutil 1.822.6 (10/09/19)
+    - Fixed segfault in msum when -c input contains certain malformed hashes
